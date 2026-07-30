@@ -1,0 +1,43 @@
+# Optional package for nodes with a Zigbee remote temperature sensor.
+# Include after cn105-cassette.yaml and set substitution:
+#   remote_sensor_entity: sensor.<zigbee sensor entity in HA>
+#
+# Pushes the room sensor's reading to the cassette via CN105 so the unit
+# conditions on actual room temperature instead of biased ceiling return air.
+# If the sensor goes stale (dead battery, mesh drop), falls back to the
+# unit's internal sensor rather than conditioning on a frozen reading.
+
+globals:
+  - id: last_remote_temp_ms
+    type: uint32_t
+    initial_value: "0"
+
+sensor:
+  - platform: homeassistant
+    id: remote_temp
+    entity_id: ${remote_sensor_entity}
+    filters:
+      # HA reports the state in its display unit; if the install is imperial
+      # this arrives in °F. Anything above 45 can't be a plausible °C room
+      # reading, so treat it as °F and convert.
+      - lambda: "return x > 45 ? (x - 32.0) * 5.0 / 9.0 : x;"
+    on_value:
+      then:
+        - lambda: "id(last_remote_temp_ms) = millis();"
+        - climate.mitsubishi_cn105.set_remote_temperature:
+            id: hvac
+            temperature: !lambda "return x;"
+
+interval:
+  - interval: 5min
+    then:
+      - if:
+          condition:
+            # Stale for >90min (SNZB-02P reports at least every ~60min) or
+            # never seen since boot — revert to the internal sensor.
+            lambda: |-
+              return id(last_remote_temp_ms) == 0 ||
+                     (millis() - id(last_remote_temp_ms)) > 90UL * 60UL * 1000UL;
+          then:
+            - climate.mitsubishi_cn105.clear_remote_temperature:
+                id: hvac

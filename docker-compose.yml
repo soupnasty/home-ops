@@ -1,0 +1,62 @@
+# Runs inside the Debian VM on soupnasty (bridged networking).
+# HA and ESPHome use host networking so mDNS (HomeKit Bridge, ESPHome
+# discovery/OTA) reaches the LAN — this is the reason the VM exists;
+# host networking is a no-op in containers directly on macOS.
+#
+# Phase 2 services carry `profiles: [phase2]`:
+#   docker compose --profile phase2 up -d
+
+services:
+  homeassistant:
+    image: ghcr.io/home-assistant/home-assistant:stable
+    container_name: homeassistant
+    network_mode: host
+    volumes:
+      - ./homeassistant:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+
+  esphome:
+    image: ghcr.io/esphome/esphome:stable
+    container_name: esphome
+    network_mode: host
+    volumes:
+      - ./esphome:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+
+  zigbee2mqtt:
+    image: koenkk/zigbee2mqtt:latest
+    container_name: zigbee2mqtt
+    ports:
+      - "8081:8080" # frontend
+    volumes:
+      - ./zigbee2mqtt:/app/data
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - mosquitto
+    restart: unless-stopped
+    # NOTE: will crash-loop until the SLZB-06 is on the network.
+    # Keep stopped until then: docker compose stop zigbee2mqtt
+
+  ring-mqtt:
+    image: tsightler/ring-mqtt:latest
+    container_name: ring-mqtt
+    profiles: [phase2]
+    volumes:
+      - ./ring-mqtt:/data
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - mosquitto
+    restart: unless-stopped

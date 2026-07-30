@@ -1,0 +1,6 @@
+substitutions:
+  name: hvac-bed1
+  friendly_name: Bedroom 1 HVAC
+
+packages:
+  cassette: !include common/cn105-cassette.yaml

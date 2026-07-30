@@ -1,0 +1,6 @@
+substitutions:
+  name: hvac-kitchen
+  friendly_name: Kitchen HVAC
+
+packages:
+  cassette: !include common/cn105-cassette.yaml

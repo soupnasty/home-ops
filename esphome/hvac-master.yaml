@@ -1,0 +1,6 @@
+substitutions:
+  name: hvac-master
+  friendly_name: Master Bedroom HVAC
+
+packages:
+  cassette: !include common/cn105-cassette.yaml

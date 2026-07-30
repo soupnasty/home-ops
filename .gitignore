@@ -1,0 +1,29 @@
+# --- secrets (never commit; see *.example files) ---
+esphome/secrets.yaml
+homeassistant/secrets.yaml
+zigbee2mqtt/configuration.yaml
+ring-mqtt/
+
+# --- Home Assistant runtime state (backed up by scripts/backup.sh, not git) ---
+homeassistant/.storage/
+homeassistant/.cloud/
+homeassistant/.HA_VERSION
+homeassistant/deps/
+homeassistant/tts/
+homeassistant/blueprints/
+homeassistant/*.db*
+homeassistant/*.log*
+homeassistant/*.fault
+
+# --- ESPHome build artifacts ---
+esphome/.esphome/
+
+# --- Zigbee2MQTT runtime (database, coordinator backup, logs) ---
+zigbee2mqtt/*
+!zigbee2mqtt/configuration.example.yaml
+
+# --- Mosquitto runtime ---
+mosquitto/data/
+mosquitto/log/
+
+.DS_Store

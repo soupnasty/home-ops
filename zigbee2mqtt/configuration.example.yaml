@@ -1,0 +1,32 @@
+# Copy to configuration.yaml before first start (the live file is gitignored
+# because Z2M writes the generated network key and paired devices into it).
+#
+#   cp zigbee2mqtt/configuration.example.yaml zigbee2mqtt/configuration.yaml
+
+version: 4
+
+homeassistant:
+  enabled: true
+
+mqtt:
+  base_topic: zigbee2mqtt
+  server: mqtt://mosquitto:1883
+
+serial:
+  # SLZB-06 in Ethernet mode. Set a DHCP reservation on the router and put
+  # the IP here — .local names don't resolve inside the container.
+  port: tcp://192.168.1.240:6638
+  adapter: zstack
+  baudrate: 115200
+
+advanced:
+  # Chosen BEFORE pairing anything, offset from the router's 2.4GHz channel
+  # (Zigbee 15 vs WiFi 11, Zigbee 25 vs WiFi 1). Changing later = re-pair all.
+  channel: 15
+  network_key: GENERATE
+  pan_id: GENERATE
+  ext_pan_id: GENERATE
+
+frontend:
+  enabled: true
+  port: 8080

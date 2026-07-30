@@ -1,0 +1,9 @@
+# Instrumented room: includes remote-temp package.
+substitutions:
+  name: hvac-living
+  friendly_name: Living Room HVAC
+  remote_sensor_entity: sensor.living_room_sensor_temperature
+
+packages:
+  cassette: !include common/cn105-cassette.yaml
+  remote_temp: !include common/remote-temp.yaml
