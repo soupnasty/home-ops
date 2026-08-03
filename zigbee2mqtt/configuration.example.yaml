@@ -20,9 +20,10 @@ serial:
   baudrate: 115200
 
 advanced:
-  # Chosen BEFORE pairing anything, offset from the router's 2.4GHz channel
-  # (Zigbee 15 vs WiFi 11, Zigbee 25 vs WiFi 1). Changing later = re-pair all.
-  channel: 15
+  # Channel 25 (2475MHz) sits above the entire WiFi 1/6/11 range — clear of
+  # all nearby networks and immune to future router channel changes.
+  # Chosen before pairing anything; changing later = re-pair all devices.
+  channel: 25
   network_key: GENERATE
   pan_id: GENERATE
   ext_pan_id: GENERATE
