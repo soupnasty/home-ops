@@ -5,5 +5,13 @@ homekit:
   filter:
     include_domains:
       - climate
+    include_entities:
+      - input_boolean.pairing_test
+
+# TODO: remove after Phase 1 — dummy accessory so the HomeKit bridge has
+# something to expose for the mDNS/pairing test before the HVAC nodes exist.
+input_boolean:
+  pairing_test:
+    name: Pairing Test
 
 automation: !include_dir_merge_list automations/
