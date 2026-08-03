@@ -5,10 +5,11 @@
 # (cloud or another box) for true off-site coverage.
 set -euo pipefail
 
-VM_HOST="${VM_HOST:-andrew@192.168.0.225}"
+# mDNS name survives DHCP address changes (no reservation on the router yet)
+VM_HOST="${VM_HOST:-andrew@home-ops.local}"
 DEST="${DEST:-$HOME/Backups/home-ops}"
 
-ssh -o BatchMode=yes -o ConnectTimeout=15 "$VM_HOST" \
+ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15 "$VM_HOST" \
   'cd ~/home-ops && sudo ./scripts/backup.sh /home/andrew/backups'
 mkdir -p "$DEST"
 rsync -a --delete "$VM_HOST:backups/" "$DEST/"
