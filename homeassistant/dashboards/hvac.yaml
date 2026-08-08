@@ -6,6 +6,18 @@ views:
       - type: thermostat
         entity: climate.living_room_hvac
         name: Living Room
+      - type: thermostat
+        entity: climate.kitchen_hvac
+        name: Kitchen
+      - type: thermostat
+        entity: climate.master_bedroom_hvac
+        name: Master Bedroom
+      - type: thermostat
+        entity: climate.nursery_hvac
+        name: Nursery
+      - type: thermostat
+        entity: climate.bedroom_1_hvac
+        name: Bedroom 1
       - type: entities
         title: Room sensors
         entities:
@@ -18,4 +30,9 @@ views:
         hours_to_show: 24
         entities:
           - entity: climate.living_room_hvac
+          - entity: climate.kitchen_hvac
+          - entity: climate.master_bedroom_hvac
+          - entity: climate.nursery_hvac
+          - entity: climate.bedroom_1_hvac
           - entity: sensor.living_room_sensor_temperature
+          - entity: sensor.nursery_sensor_temperature
