@@ -10,6 +10,7 @@ substitutions:
   # and swap here if the unit never responds.
   tx_pin: GPIO1
   rx_pin: GPIO2
+  cn105_baud: "2400" # some units want 9600
 
 esphome:
   name: ${name}
@@ -43,8 +44,14 @@ captive_portal:
 uart:
   id: cn105_uart
   tx_pin: ${tx_pin}
-  rx_pin: ${rx_pin}
-  baud_rate: 2400 # some units want 9600 — try that if state never populates
+  # Pullup so a disconnected/unwired RX idles high instead of floating —
+  # a floating RX couples to our own TX and shows up as a phantom echo.
+  rx_pin:
+    number: ${rx_pin}
+    mode:
+      input: true
+      pullup: true
+  baud_rate: ${cn105_baud}
   data_bits: 8
   parity: EVEN
   stop_bits: 1
