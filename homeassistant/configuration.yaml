@@ -3,6 +3,14 @@ default_config:
 homeassistant:
   unit_system: us_customary # display °F everywhere; devices still speak °C natively
 
+lovelace:
+  dashboards:
+    hvac-control:
+      mode: yaml
+      title: HVAC
+      icon: mdi:hvac
+      filename: dashboards/hvac.yaml
+
 # HomeKit is a projection: curated subset only, climate first.
 homekit:
   filter:

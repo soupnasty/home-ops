@@ -1,0 +1,21 @@
+title: HVAC
+views:
+  - title: Climate
+    path: climate
+    cards:
+      - type: thermostat
+        entity: climate.living_room_hvac
+        name: Living Room
+      - type: entities
+        title: Room sensors
+        entities:
+          - entity: sensor.living_room_sensor_temperature
+            name: Living room
+          - entity: sensor.nursery_sensor_temperature
+            name: Nursery
+      - type: history-graph
+        title: Last 24h
+        hours_to_show: 24
+        entities:
+          - entity: climate.living_room_hvac
+          - entity: sensor.living_room_sensor_temperature
