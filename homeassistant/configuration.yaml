@@ -1,5 +1,8 @@
 default_config:
 
+homeassistant:
+  unit_system: us_customary # display °F everywhere; devices still speak °C natively
+
 # HomeKit is a projection: curated subset only, climate first.
 homekit:
   filter:
