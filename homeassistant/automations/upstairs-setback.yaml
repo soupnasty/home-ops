@@ -1,0 +1,92 @@
+# Upstairs daytime setback — nursery + bed1 (second floor, unoccupied most of the day).
+# Logic lives here in git; every tunable is a helper, adjustable from the HA app.
+# Cooling-season only: units not in cool mode are left alone, so a manual "off"
+# or winter heat mode is never fought. Setback/restore each fire once at their
+# scheduled time — a manual setpoint change between them sticks.
+
+- id: upstairs_setback_apply
+  alias: "Upstairs: apply daytime setback"
+  trigger:
+    - platform: time
+      at: input_datetime.upstairs_setback_start
+  condition:
+    - condition: state
+      entity_id: input_boolean.upstairs_setback_enabled
+      state: "on"
+  action:
+    - repeat:
+        for_each:
+          - climate.nursery_hvac
+          - climate.bedroom_1_hvac
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ states(repeat.item) == 'cool' }}"
+            then:
+              - service: climate.set_temperature
+                target:
+                  entity_id: "{{ repeat.item }}"
+                data:
+                  temperature: "{{ states('input_number.upstairs_setback_temp') | float(78) }}"
+
+- id: upstairs_setback_restore
+  alias: "Upstairs: restore comfort for the evening"
+  # Fires whether or not the setback did — idempotent end state, so bedtime
+  # comfort never depends on what happened during the day.
+  trigger:
+    - platform: time
+      at: input_datetime.upstairs_restore_time
+  condition:
+    - condition: state
+      entity_id: input_boolean.upstairs_setback_enabled
+      state: "on"
+  action:
+    - repeat:
+        for_each:
+          - climate.nursery_hvac
+          - climate.bedroom_1_hvac
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ states(repeat.item) == 'cool' }}"
+            then:
+              - service: climate.set_temperature
+                target:
+                  entity_id: "{{ repeat.item }}"
+                data:
+                  temperature: "{{ states('input_number.upstairs_comfort_temp') | float(73.5) }}"
+
+- id: nursery_ceiling_guard
+  alias: "Nursery: cool anyway if too hot during setback"
+  # Unexpected nap insurance: if the nursery passes the ceiling while our
+  # setback target is in place, drop it back to comfort. Only acts when the
+  # current target still matches the setback value (±0.6°F covers the unit's
+  # 0.5°C setpoint quantization) — a manually chosen setpoint is respected.
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.nursery_sensor_temperature
+      above: input_number.nursery_temp_ceiling
+      for: "00:05:00"
+  condition:
+    - condition: state
+      entity_id: input_boolean.upstairs_setback_enabled
+      state: "on"
+    - condition: state
+      entity_id: climate.nursery_hvac
+      state: "cool"
+    - condition: template
+      value_template: >-
+        {{ (state_attr('climate.nursery_hvac', 'temperature') | float(0)
+            - states('input_number.upstairs_setback_temp') | float(78)) | abs < 0.6 }}
+  action:
+    - service: climate.set_temperature
+      target:
+        entity_id: climate.nursery_hvac
+      data:
+        temperature: "{{ states('input_number.upstairs_comfort_temp') | float(73.5) }}"
+    - service: persistent_notification.create
+      data:
+        title: Nursery ceiling guard
+        message: >-
+          Nursery hit {{ states('sensor.nursery_sensor_temperature') }}°F during
+          setback — restored comfort target early.

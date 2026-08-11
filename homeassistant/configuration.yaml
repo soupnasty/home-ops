@@ -24,5 +24,44 @@ homekit:
 input_boolean:
   pairing_test:
     name: Pairing Test
+  upstairs_setback_enabled:
+    name: Upstairs Daytime Setback
+    icon: mdi:home-thermometer
+
+# Knobs for automations/upstairs-setback.yaml — adjustable from the HA app;
+# values persist across restarts (no initial: on purpose). Set them once in
+# the app after deploy.
+input_number:
+  upstairs_setback_temp:
+    name: Upstairs Setback Target
+    min: 74
+    max: 82
+    step: 0.5
+    unit_of_measurement: °F
+    icon: mdi:thermometer-chevron-up
+  upstairs_comfort_temp:
+    name: Upstairs Comfort Target
+    min: 68
+    max: 76
+    step: 0.5
+    unit_of_measurement: °F
+    icon: mdi:thermometer-check
+  nursery_temp_ceiling:
+    name: Nursery Temp Ceiling
+    min: 74
+    max: 80
+    step: 0.5
+    unit_of_measurement: °F
+    icon: mdi:thermometer-alert
+
+input_datetime:
+  upstairs_setback_start:
+    name: Upstairs Setback Start
+    has_time: true
+    has_date: false
+  upstairs_restore_time:
+    name: Upstairs Restore Time
+    has_time: true
+    has_date: false
 
 automation: !include_dir_merge_list automations/
