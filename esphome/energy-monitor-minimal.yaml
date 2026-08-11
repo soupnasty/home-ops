@@ -1,0 +1,37 @@
+# Minimal first-flash image for the Emporia Vue 3 (serial/bench flash only).
+# Purpose: smallest possible config that joins WiFi and accepts OTA — the full
+# energy-monitor.yaml is pushed OTA after this boots. Everything after the one
+# bench serial flash is over-the-air.
+substitutions:
+  name: energy-monitor
+  friendly_name: Energy Monitor
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  flash_size: 8MB
+  cpu_frequency: 160MHz # Vue browns out at ESPHome's 240MHz default
+  framework:
+    type: esp-idf
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: ${name} Fallback
+    password: !secret fallback_ap_password
+
+captive_portal:

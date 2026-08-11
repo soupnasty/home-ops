@@ -40,17 +40,21 @@ Branch CTs mapped to the actual circuit directory:
 
 | Breaker(s) | Circuit | CTs | Config notes |
 |---|---|---|---|
-| 1/3 and 5/7 | HVAC (two 2-pole circuits) | 2 | One CT per circuit + `multiply: 2` (pure 240 V). ⚠️ Directory shows TWO HVAC 2-poles but Andrew reports ONE outdoor unit — verify on install day which breaker(s) actually feed it (flip test); the second may be an abandoned/legacy circuit or a separate feed |
+| 5/7 | Heat pump (outdoor unit → all 6 heads) | 1 | Flip-test verified 2026-08-11: killing 5/7 dropped every head; single CT + `multiply: 2` (pure 240 V) measures ALL HVAC |
+| 1/3 | Mystery 2-pole labeled "HVAC" | 1 | Flip-test: feeds nothing observable — likely legacy (pre-mini-split furnace?). CT stays on as a watchdog (expect 0 W; any reading identifies it) |
 | 2/4 | Dryer | 2 (merged) | Has neutral → CT per leg, summed in config |
 | 24/26 | Water heater (electric — confirmed by directory) | 1 | Pure 240 V → single CT ×2 |
-| 33 (+pair) | Range | 2 (merged) | Directory ambiguity: 33 "range" but its pair slot is labeled countertop outlets — verify it's a 2-pole electric range and find its second leg |
+| 33 | Range | 1 | Single slot in directory (2-pole loads are listed twice on this sheet) → likely gas range on a 120 V circuit. Verify pole count at the breaker; if 2-pole, second leg goes to spare port 13 as a summed pair |
 | 28 | Refrigerator | 1 | |
 | 29 | Microwave | 1 | |
-| 22 or 25 | Dishwasher | 1 | Labels 22/25 are cross-corrected on the sheet (dishwasher↔disposal swapped) — identify which is actually the dishwasher |
+| 25 | Dishwasher | 1 | Confirmed from clear directory photo (22 is the disposal; labels were swap-corrected on the sheet) |
 | 30, 35 | Kitchen countertop outlets | 2 | |
-| — | Spare | 4 | Headroom for EV/solar/laundry later; mains CTs already bidirectional |
+| 11 | Laundry (washer) | 1 | Added with the CT freed by the gas range |
+| — | Spare | 4 | Headroom for EV/solar later; mains CTs already bidirectional |
 
-Total: 12 of 16 branch CTs used. CTs clamp the hot leg at each breaker. Branch CTs are
+Total: 12 of 16 branch CTs used. Vue port order: 1=HVAC 1/3, 2=HVAC 5/7, 3/4=dryer legs,
+5=water heater, 6=range, 7=fridge, 8=microwave, 9=dishwasher, 10/11=countertops 30/35,
+12=laundry (matches esphome/energy-monitor.yaml — label CT leads before panel day). CTs clamp the hot leg at each breaker. Branch CTs are
 rated 50 A but accurate through 63 A (saturate ~75 A); >63 A circuits (future EV) use a
 200 A mains-style CT on a branch port with multiplier 4.0 — on Gen 3 that means
 re-terminating the 200 A CT's wires into a 3.81 mm terminal block (the Gen 2 jack-adapter

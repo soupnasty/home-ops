@@ -1,0 +1,144 @@
+# Emporia Vue 3 whole-home energy monitor (ESPHome-flashed, fully local).
+# First flash is serial with energy-monitor-minimal.yaml; this full config is
+# pushed OTA afterwards. See docs/energy-monitoring.md for the install spec.
+#
+# CT map is from the panel directory (docs/energy-monitoring.md). Two things are
+# tuned on/after install day with real current flowing:
+#   - sign flips: a CT clamped "backwards" reads negative — fix with multiply: -1
+#     in that circuit's filters (or re-clamp), don't re-open the panel for it.
+#   - phase calibration: verify mains voltage with a multimeter at an outlet;
+#     new_cal = 0.01925 * actual_v / reported_v.
+substitutions:
+  name: energy-monitor
+  friendly_name: Energy Monitor
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+
+esp32:
+  board: esp32dev
+  flash_size: 8MB
+  cpu_frequency: 160MHz # Vue browns out at ESPHome's 240MHz default
+  framework:
+    type: esp-idf
+
+preferences:
+  flash_write_interval: 48h # protect flash; total_daily_energy restores are not critical
+
+logger:
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  ap:
+    ssid: ${name} Fallback
+    password: !secret fallback_ap_password
+
+captive_portal:
+
+external_components:
+  # Pinned 2026-08-11 (dev HEAD; includes the vue3 variant + the 2026.4.x
+  # watchdog/polling fix). Bump deliberately, never track a moving branch.
+  - source: github://emporia-vue-local/esphome@79e2747371b70370b96ef919f7c1e556f461344a
+    components: [emporia_vue]
+
+time:
+  - platform: homeassistant
+    id: ha_time # total_daily_energy needs a time source for midnight reset
+
+i2c: # Vue 3 pins (Gen 2 was 21/22); 400kHz + 1ms timeout per component docs
+  sda: 5
+  scl: 18
+  scan: false
+  frequency: 400kHz
+  timeout: 1ms
+  id: i2c_vue
+
+sensor:
+  - platform: emporia_vue
+    variant: vue3
+    i2c_id: i2c_vue
+    phases:
+      - id: phase_a # black harness wire (L1)
+        input: BLACK
+        calibration: 0.01925
+        voltage:
+          name: Phase A Voltage
+          filters: [throttle_average: 5s]
+      - id: phase_b # red harness wire (L2)
+        input: RED
+        calibration: 0.01925
+        voltage:
+          name: Phase B Voltage
+          filters: [throttle_average: 5s]
+    ct_clamps:
+      # --- mains ---
+      - { phase_id: phase_a, input: "A", power: { id: power_main_a, name: Main A Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_b, input: "B", power: { id: power_main_b, name: Main B Power, filters: [throttle_average: 5s] } }
+      # --- branch CTs (input = port number on the Vue) ---
+      # Heat pump: breakers 5/7 feed the outdoor unit = ALL HVAC (flip-test verified
+      # 2026-08-11: killing 5/7 dropped all six heads; killing 1/3 affected nothing).
+      # Pure 240V -> single CT x2.
+      - { phase_id: phase_a, input: "1", power: { id: power_hvac, name: Heat Pump Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # Breakers 1/3: 2-pole labeled HVAC but feeds nothing observable (legacy?).
+      # CT stays on it as a watchdog - should read 0W forever; if it ever shows
+      # load, we found what it feeds.
+      - { phase_id: phase_a, input: "2", power: { id: power_mystery_13, name: Breaker 1-3 Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # Dryer (breakers 2/4): has neutral -> CT per leg, summed below
+      - { phase_id: phase_a, input: "3", power: { id: power_dryer_l1, name: Dryer L1 Power, internal: true, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_b, input: "4", power: { id: power_dryer_l2, name: Dryer L2 Power, internal: true, filters: [throttle_average: 5s] } }
+      # Water heater (breakers 24/26): pure 240V -> single CT x2
+      - { phase_id: phase_a, input: "5", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # Range (breaker 33): single slot in the directory -> likely gas range,
+      # 120V circuit. VERIFY pole count on install day; if it turns out 2-pole,
+      # clamp the second leg into port 13 and convert to a summed pair like dryer.
+      - { phase_id: phase_a, input: "6", power: { id: power_range, name: Range Power, filters: [throttle_average: 5s] } }
+      # 120V kitchen + laundry circuits
+      - { phase_id: phase_a, input: "7", power: { id: power_fridge, name: Refrigerator Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_a, input: "8", power: { id: power_microwave, name: Microwave Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_a, input: "9", power: { id: power_dishwasher, name: Dishwasher Power, filters: [throttle_average: 5s] } } # breaker 25 (sheet corrected; 22 is the disposal)
+      - { phase_id: phase_a, input: "10", power: { id: power_counter_1, name: Kitchen Countertop 30 Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_b, input: "11", power: { id: power_counter_2, name: Kitchen Countertop 35 Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_a, input: "12", power: { id: power_laundry, name: Laundry Power, filters: [throttle_average: 5s] } } # breaker 11 (washer) — freed CT put to work
+      # Ports 13-16 spare. NOTE: phase_id assignments for branch CTs above are
+      # provisional - set each to the leg its breaker actually sits on (matters
+      # for power-factor accuracy, discovered at install).
+
+  # --- derived totals ---
+  - platform: template
+    id: power_total
+    name: Total Power
+    unit_of_measurement: W
+    device_class: power
+    state_class: measurement
+    update_interval: 5s
+    lambda: return id(power_main_a).state + id(power_main_b).state;
+  - platform: template
+    id: power_dryer
+    name: Dryer Power
+    unit_of_measurement: W
+    device_class: power
+    state_class: measurement
+    update_interval: 5s
+    lambda: return id(power_dryer_l1).state + id(power_dryer_l2).state;
+  # --- energy (kWh) for the HA Energy dashboard ---
+  - { platform: total_daily_energy, name: Total Daily Energy, power_id: power_total, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Heat Pump Daily Energy, power_id: power_hvac, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Dryer Daily Energy, power_id: power_dryer, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Water Heater Daily Energy, power_id: power_water_heater, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Range Daily Energy, power_id: power_range, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Refrigerator Daily Energy, power_id: power_fridge, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Microwave Daily Energy, power_id: power_microwave, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Dishwasher Daily Energy, power_id: power_dishwasher, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Countertop 30 Daily Energy, power_id: power_counter_1, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Countertop 35 Daily Energy, power_id: power_counter_2, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Laundry Daily Energy, power_id: power_laundry, restore: false, filters: [throttle: 60s] }
