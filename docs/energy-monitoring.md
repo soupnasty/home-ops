@@ -1,6 +1,6 @@
 # Energy monitoring — Emporia Vue Gen 3 spec
 
-Status: research complete 2026-08-09, hardware not yet ordered.
+Status: research complete 2026-08-09, verified against primary sources same day; hardware not yet ordered.
 Goal: whole-home + per-circuit energy in HA's Energy dashboard, fully local
 (ESPHome-flashed, no Emporia cloud), per-HVAC energy attribution.
 
@@ -18,21 +18,21 @@ Goal: whole-home + per-circuit energy in HA's Energy dashboard, fully local
   breakage; the fix lives in the component, so pin it by commit at setup time.
   Do NOT use the deprecated `@vue3` branch.
 - Internals: ESP32-D0WD-V3, 8 MB flash, no secure boot / no efuse locks — reflashable.
-  Caveat: Emporia has shipped silent board revisions with different GPIO pin maps
-  (breaks Phase A readings under the standard config); digiblur's fork carries the fix.
-  Which revision we get is discovered at flash time — not a blocker, just a fork swap.
+  The Vue 3's mains CT ports A/C are swapped in the I2C payload vs Gen 2 (this was the
+  "Phase A reads wrong" issue that digiblur's fork fixed) — the remap is now merged
+  upstream and handled automatically by `variant: vue3`. No fork needed.
 
 ## Order list
 
 | Item | Est. | Notes |
 |---|---|---|
 | Emporia Vue 3, 16-sensor kit | $199.99 | Includes 2× 200 A mains CTs + 16× 50 A branch CTs + voltage harness + antenna |
-| 3.3 V USB-TTL adapter | ~$10 | FTDI FT232RL-style preferred — CP2102 boards' weak 3.3 V rail is known to brown out the ESP32 mid-flash |
-| (optional) Flash jig print | filament | Printables model 1152988 (fixed-tolerance remix). Soldered wires are the more reliable one-time path |
-| 2× Square D QO115 breakers | ~$25 | Power the Vue's voltage harness in the panel's empty bottom spaces (QO series, not Homeline) |
+| 3.3 V USB-TTL adapter | ~$10 | No adapter's 3.3 V rail is really enough (ESP32 draws ~150 mA with radio; CP2102 ≈75 mA, FT232RL ≈50 mA — worse). Plan to power the board separately: external 3.3 V supply with common ground, or adapter 5 V into the LL33 regulator's input pin |
+| (optional) Flash jig print | filament | Printables model 1152988 (fixed-tolerance remix), pogo pins + Dupont jumpers. Official docs warn against soldering to the tiny pads (pad-lift risk); jig/pogo is the recommended path. Conformal coating on the pads can block pogo contact — scrape if needed |
+| 2× Square D QO115 breakers | ~$35 | ~$17 each at big-box (2026). Power the Vue's voltage harness in the panel's empty bottom spaces (QO series, not Homeline) |
 | (optional) RP-SMA M-F extension | ~$8 | Only if antenna placement near the panel needs help |
 
-## CT allocation (from panel photo 2026-08-09 — Square D QO, QOC42UF 42-space)
+## CT allocation (from panel photo 2026-08-09 — Square D QO 42-space; cover part QOC42UF)
 
 Mains: 2× 200 A CTs on the service conductors between meter and main breaker.
 
@@ -50,8 +50,11 @@ Branch CTs mapped to the actual circuit directory:
 | 30, 35 | Kitchen countertop outlets | 2 | |
 | — | Spare | 4 | Headroom for EV/solar/laundry later; mains CTs already bidirectional |
 
-Total: 12 of 16 branch CTs used. CTs clamp the hot leg at each breaker; >50 A branch
-circuits (future EV) use a 200 A mains-style CT on a side port with multiplier 4.0.
+Total: 12 of 16 branch CTs used. CTs clamp the hot leg at each breaker. Branch CTs are
+rated 50 A but accurate through 63 A (saturate ~75 A); >63 A circuits (future EV) use a
+200 A mains-style CT on a branch port with multiplier 4.0 — on Gen 3 that means
+re-terminating the 200 A CT's wires into a 3.81 mm terminal block (the Gen 2 jack-adapter
+trick doesn't apply; Gen 3 uses screw terminals throughout).
 
 ## Vue power connection (this panel)
 
@@ -74,9 +77,11 @@ existing circuits entirely.
 
 ## Flash plan (bench, before panel install)
 
-1. Open case (5 screws + antenna nut). Test pads: GND / **3.3 V** / GND / TXD / RXD.
-   **3.3 V only — 5 V destroys the board.** A user bricked one feeding 5 V to the
-   regulator; that's the only true bricking path.
+1. Open case (5 screws + loosen antenna SMA nut). Test pads: GND / **3.3 V** / GND /
+   TXD / RXD. **Never put 5 V on the 3.3 V pad — that destroys the board.** (Feeding
+   5 V into the LL33 regulator's *input* pin is fine — it's the recommended way to
+   power the board when the adapter's 3.3 V rail is too weak, which it always is.)
+   Use pogo pins / the jig, not solder — the pads lift easily.
 2. Wiring quirk: pads are silkscreened transposed — wire **straight through**
    (adapter RX→RXD, TX→TXD). If esptool won't sync, swap.
 3. Ground GPIO0 before power-up for boot mode.
@@ -96,15 +101,21 @@ Key elements (full config written at build time):
 ```yaml
 esp32:
   board: esp32dev
-  flash_size: 8MB          # omitting this breaks flashing on the 8MB Gen 3
-  cpu_frequency: 160MHz    # belt-and-suspenders vs the 240MHz brownout regression
+  flash_size: 8MB          # matches Gen 3 hardware (optional — default 4MB image also works)
+  cpu_frequency: 160MHz    # ESPHome 2026.4.0 changed the default to 240MHz → brownouts on the Vue
   framework: { type: esp-idf }
 preferences:
   flash_write_interval: 48h
 external_components:
   - source: github://emporia-vue-local/esphome@<PINNED_COMMIT>   # dev branch, pin at build time
     components: [emporia_vue]
-i2c: { sda: 5, scl: 18, scan: false, frequency: 400kHz, timeout: 1ms }  # Gen 3 pins (not 21/22)
+i2c:  # Gen 3 pins (not 21/22); 400kHz + 1ms timeout fixes Vue3 i2c errors
+  sda: 5
+  ignore_strapping_warning: true   # GPIO5 is a strapping pin — expected on Vue 3
+  scl: 18
+  scan: false
+  frequency: 400kHz
+  timeout: 1ms
 sensor:
   - platform: emporia_vue
     variant: vue3
@@ -131,11 +142,11 @@ Calibration: per-phase, not per-CT. Verify voltage against a multimeter at an ou
 
 ## Known risks / open items
 
-- Board-revision pin-map lottery → may need digiblur's fork (`digiblur/esphome-vue3`)
-  if Phase A reads wrong after flashing. Discovered at flash time; recoverable.
-- Unpopulated CT inputs can read 65535 garbage (component patches this; don't panic).
-- One unresolved community report of WiFi failing post-flash on an Ethernet-flashed
-  unit — if WiFi misbehaves, Ethernet port is the fallback (or the powerline-adapter
-  plan B already earmarked for the VM).
+- Unpopulated CT inputs can read 65535 garbage — the component does NOT patch this;
+  clamp it with YAML sensor filters on any input left unclamped (the 400kHz/1ms i2c
+  settings above also reduce these malformed reads).
+- Ethernet and WiFi are mutually exclusive at compile time (ESPHome won't build with
+  both). Pick WiFi for the initial build; switching to Ethernet later is an OTA config
+  change (use a static IP when switching). Powerline-adapter plan B still stands.
 - Bench-validate OTA before panel install (see flash plan step 6) — recovery from a
   bad OTA in-panel means pulling the unit back out.
