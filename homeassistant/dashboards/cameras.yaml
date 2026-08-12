@@ -12,6 +12,13 @@ views:
     path: cameras
     icon: mdi:cctv
     cards:
+      # Disarm from here needs no PIN until ring-mqtt's disarm_code is set.
+      - type: alarm-panel
+        name: Ring Alarm
+        entity: alarm_control_panel.falls_church_alarm
+        states:
+          - arm_home
+          - arm_away
       - type: picture-glance
         title: Front Door
         camera_image: camera.front_door
