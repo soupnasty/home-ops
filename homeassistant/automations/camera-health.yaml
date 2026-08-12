@@ -1,0 +1,69 @@
+# Camera health alerts. The offline signal is the ring-mqtt wireless sensor
+# going unknown/unavailable — entities do NOT go unavailable when a camera
+# drops (Ring cloud keeps the device registered; verified 2026-08-12 when the
+# Cat Room cam went dark and nothing else changed state). RSSI number = online.
+- id: camera_offline_alert
+  alias: "Camera offline alert"
+  mode: parallel
+  triggers:
+    - trigger: state
+      entity_id: &camera_wireless
+        - sensor.front_door_wireless
+        - sensor.dining_room_wireless
+        - sensor.garage_wireless
+        - sensor.driveway_wireless
+        - sensor.back_porch_wireless
+        - sensor.back_side_wireless
+        - sensor.front_side_wireless
+        - sensor.cat_room_wireless
+      to:
+        - unknown
+        - unavailable
+      for: "00:15:00"
+  actions:
+    - action: notify.mobile_app_iphone_106
+      data:
+        title: "📷 Camera offline"
+        message: >-
+          {{ trigger.to_state.name | replace(' Wireless', '') }} has been
+          offline for 15 minutes. Check its power and WiFi.
+
+- id: camera_back_online_alert
+  alias: "Camera back online alert"
+  mode: parallel
+  triggers:
+    - trigger: state
+      entity_id: *camera_wireless
+      from:
+        - unknown
+        - unavailable
+  conditions:
+    # Only announce recovery from a real outage, not startup blips: the
+    # offline state must have lasted at least as long as the alert window.
+    - condition: template
+      value_template: >-
+        {{ trigger.from_state is not none and
+           (trigger.to_state.last_changed - trigger.from_state.last_changed)
+           >= timedelta(minutes=15) }}
+  actions:
+    - action: notify.mobile_app_iphone_106
+      data:
+        title: "📷 Camera back online"
+        message: "{{ trigger.to_state.name | replace(' Wireless', '') }} reconnected."
+
+- id: camera_battery_low_alert
+  alias: "Camera battery low alert"
+  mode: parallel
+  triggers:
+    - trigger: numeric_state
+      entity_id:
+        - sensor.front_side_battery
+        - sensor.back_side_battery
+      below: 20
+  actions:
+    - action: notify.mobile_app_iphone_106
+      data:
+        title: "🔋 Camera battery low"
+        message: >-
+          {{ trigger.to_state.name | replace(' Battery', '') }} is at
+          {{ trigger.to_state.state }}% — time to charge it.

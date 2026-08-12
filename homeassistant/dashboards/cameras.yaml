@@ -82,3 +82,16 @@ views:
         aspect_ratio: 16x9
         entities:
           - binary_sensor.cat_room_motion
+      - type: logbook
+        title: Activity
+        hours_to_show: 24
+        entities:
+          - binary_sensor.front_door_ding
+          - binary_sensor.front_door_motion
+          - binary_sensor.driveway_motion
+          - binary_sensor.garage_motion
+          - binary_sensor.back_porch_motion
+          - binary_sensor.front_side_motion
+          - binary_sensor.back_side_motion
+          - binary_sensor.dining_room_motion
+          - binary_sensor.cat_room_motion
