@@ -144,3 +144,31 @@ input_datetime:
     has_date: false
 
 automation: !include_dir_merge_list automations/
+
+# Room temperatures for rooms without a standalone sensor, derived from the
+# HVAC units' intake sensors — used as each area's temperature entity so the
+# overview area tiles show a reading. Living room + nursery use their Zigbee
+# sensors directly instead.
+template:
+  - sensor:
+      - name: "Kitchen Temperature"
+        unique_id: kitchen_temperature_from_hvac
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.kitchen_hvac', 'current_temperature') }}"
+        availability: "{{ state_attr('climate.kitchen_hvac', 'current_temperature') is not none }}"
+      - name: "Master Bedroom Temperature"
+        unique_id: master_bedroom_temperature_from_hvac
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.master_bedroom_hvac', 'current_temperature') }}"
+        availability: "{{ state_attr('climate.master_bedroom_hvac', 'current_temperature') is not none }}"
+      - name: "Bedroom 1 Temperature"
+        unique_id: bedroom_1_temperature_from_hvac
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') }}"
+        availability: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') is not none }}"
