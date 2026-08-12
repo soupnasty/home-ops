@@ -5,7 +5,8 @@
 # and motion detection pauses while a camera streams).
 # Sections layout: alarm pinned full-width on top, cameras in strict order
 # (outdoor first, indoor last) two per row, activity feed at the bottom.
-# grid_options columns are twelfths of the section; 6 = half width.
+# grid_options columns: a column_span-2 section is 24 columns wide internally,
+# so 12 = half width (two cameras per row).
 title: Cameras
 views:
   - title: Cameras
@@ -25,7 +26,7 @@ views:
               - arm_home
               - arm_away
             grid_options:
-              columns: 6
+              columns: 12
       - type: grid
         column_span: 2
         cards:
@@ -35,7 +36,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.front_door_ding
               - binary_sensor.front_door_motion
@@ -45,7 +46,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.driveway_motion
               - light.driveway_light
@@ -55,7 +56,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.garage_motion
           - type: picture-glance
@@ -64,7 +65,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.back_porch_motion
               - light.back_porch_light
@@ -74,7 +75,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.front_side_motion
               - entity: sensor.front_side_battery
@@ -85,7 +86,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.back_side_motion
               - entity: sensor.back_side_battery
@@ -96,7 +97,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.dining_room_motion
           - type: picture-glance
@@ -105,7 +106,7 @@ views:
             camera_view: auto
             aspect_ratio: 16x9
             grid_options:
-              columns: 6
+              columns: 12
             entities:
               - binary_sensor.cat_room_motion
       - type: grid
