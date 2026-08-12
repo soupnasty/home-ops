@@ -57,7 +57,8 @@ views:
         aspect_ratio: 16x9
         entities:
           - binary_sensor.front_side_motion
-          - sensor.front_side_battery
+          - entity: sensor.front_side_battery
+            show_state: true
       - type: picture-glance
         title: Back Side
         camera_image: camera.back_side
@@ -65,7 +66,8 @@ views:
         aspect_ratio: 16x9
         entities:
           - binary_sensor.back_side_motion
-          - sensor.back_side_battery
+          - entity: sensor.back_side_battery
+            show_state: true
       - type: picture-glance
         title: Dining Room
         camera_image: camera.dining_room
