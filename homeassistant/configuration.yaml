@@ -3,6 +3,12 @@ default_config:
 homeassistant:
   unit_system: us_customary # display °F everywhere; devices still speak °C natively
 
+# Theme files live in themes/ — after editing, "frontend.reload_themes" applies
+# them without a restart. Pick per-device via profile, or set a default with
+# the frontend.set_theme action.
+frontend:
+  themes: !include_dir_merge_named themes
+
 lovelace:
   dashboards:
     hvac-control:
@@ -10,14 +16,96 @@ lovelace:
       title: HVAC
       icon: mdi:hvac
       filename: dashboards/hvac.yaml
+    home-cameras:
+      mode: yaml
+      title: Cameras
+      icon: mdi:cctv
+      filename: dashboards/cameras.yaml
 
 # HomeKit is a projection: curated subset only, climate first.
+# First entry = the original bridge (do not rename/re-port — paired in Apple Home).
+# Cameras must each be their own accessory-mode instance (Apple requirement);
+# one fixed port per camera, paired once via QR from HA notifications.
+# video_codec copy = no transcoding (streams are H.264 already).
 homekit:
-  filter:
-    include_domains:
-      - climate
-    include_entities:
-      - input_boolean.pairing_test
+  - filter:
+      include_domains:
+        - climate
+      include_entities:
+        - input_boolean.pairing_test
+  - name: HomeKit Front Door
+    port: 21064
+    mode: accessory
+    filter:
+      include_entities: [camera.front_door]
+    entity_config:
+      camera.front_door:
+        video_codec: copy
+        linked_doorbell_sensor: binary_sensor.front_door_ding
+        linked_motion_sensor: binary_sensor.front_door_motion
+  - name: HomeKit Dining Room Cam
+    port: 21065
+    mode: accessory
+    filter:
+      include_entities: [camera.dining_room]
+    entity_config:
+      camera.dining_room:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.dining_room_motion
+  - name: HomeKit Garage Cam
+    port: 21066
+    mode: accessory
+    filter:
+      include_entities: [camera.garage]
+    entity_config:
+      camera.garage:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.garage_motion
+  - name: HomeKit Driveway Cam
+    port: 21067
+    mode: accessory
+    filter:
+      include_entities: [camera.driveway]
+    entity_config:
+      camera.driveway:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.driveway_motion
+  - name: HomeKit Back Porch Cam
+    port: 21068
+    mode: accessory
+    filter:
+      include_entities: [camera.back_porch]
+    entity_config:
+      camera.back_porch:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.back_porch_motion
+  - name: HomeKit Back Side Cam
+    port: 21069
+    mode: accessory
+    filter:
+      include_entities: [camera.back_side]
+    entity_config:
+      camera.back_side:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.back_side_motion
+  - name: HomeKit Front Side Cam
+    port: 21070
+    mode: accessory
+    filter:
+      include_entities: [camera.front_side]
+    entity_config:
+      camera.front_side:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.front_side_motion
+  - name: HomeKit Cat Room Cam
+    port: 21071
+    mode: accessory
+    filter:
+      include_entities: [camera.cat_room]
+    entity_config:
+      camera.cat_room:
+        video_codec: copy
+        linked_motion_sensor: binary_sensor.cat_room_motion
 
 # TODO: remove after Phase 1 — dummy accessory so the HomeKit bridge has
 # something to expose for the mDNS/pairing test before the HVAC nodes exist.

@@ -54,6 +54,9 @@ services:
     image: tsightler/ring-mqtt:latest
     container_name: ring-mqtt
     profiles: [phase2]
+    ports:
+      - "55123:55123" # token-setup web UI (also used on re-auth)
+      - "8554:8554" # go2rtc RTSP — on-demand live streams for HA generic cameras
     volumes:
       - ./ring-mqtt:/data
       - /etc/localtime:/etc/localtime:ro

@@ -1,0 +1,64 @@
+# Cameras dashboard — cards show the ring-mqtt snapshot (updates on motion +
+# interval, no camera wake). Tapping a card opens more-info where the live
+# RTSP stream starts on demand. Keep camera_view: auto — "live" would open
+# streams to every camera whenever the dashboard is viewed (battery drain,
+# and motion detection pauses while a camera streams).
+title: Cameras
+views:
+  - title: Cameras
+    path: cameras
+    icon: mdi:cctv
+    cards:
+      - type: picture-glance
+        title: Front Door
+        camera_image: camera.front_door
+        camera_view: auto
+        entities:
+          - binary_sensor.front_door_ding
+          - binary_sensor.front_door_motion
+      - type: picture-glance
+        title: Driveway
+        camera_image: camera.driveway
+        camera_view: auto
+        entities:
+          - binary_sensor.driveway_motion
+          - light.driveway_light
+      - type: picture-glance
+        title: Garage
+        camera_image: camera.garage
+        camera_view: auto
+        entities:
+          - binary_sensor.garage_motion
+      - type: picture-glance
+        title: Back Porch
+        camera_image: camera.back_porch
+        camera_view: auto
+        entities:
+          - binary_sensor.back_porch_motion
+          - light.back_porch_light
+      - type: picture-glance
+        title: Dining Room
+        camera_image: camera.dining_room
+        camera_view: auto
+        entities:
+          - binary_sensor.dining_room_motion
+      - type: picture-glance
+        title: Front Side
+        camera_image: camera.front_side
+        camera_view: auto
+        entities:
+          - binary_sensor.front_side_motion
+          - sensor.front_side_battery
+      - type: picture-glance
+        title: Back Side
+        camera_image: camera.back_side
+        camera_view: auto
+        entities:
+          - binary_sensor.back_side_motion
+          - sensor.back_side_battery
+      - type: picture-glance
+        title: Cat Room
+        camera_image: camera.cat_room
+        camera_view: auto
+        entities:
+          - binary_sensor.cat_room_motion
