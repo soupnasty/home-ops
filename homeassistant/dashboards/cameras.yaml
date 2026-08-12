@@ -19,12 +19,16 @@ views:
         column_span: 2
         cards:
           # Disarm from here needs no PIN until ring-mqtt's disarm_code is set.
-          - type: alarm-panel
-            name: Ring Alarm
+          - type: tile
             entity: alarm_control_panel.falls_church_alarm
-            states:
-              - arm_home
-              - arm_away
+            name: Ring Alarm
+            features_position: bottom
+            features:
+              - type: alarm-modes
+                modes:
+                  - armed_home
+                  - armed_away
+                  - disarmed
             grid_options:
               columns: full
       - type: grid
