@@ -97,15 +97,6 @@ homekit:
       camera.front_side:
         video_codec: copy
         linked_motion_sensor: binary_sensor.front_side_motion
-  - name: HomeKit Cat Room Cam
-    port: 21071
-    mode: accessory
-    filter:
-      include_entities: [camera.cat_room]
-    entity_config:
-      camera.cat_room:
-        video_codec: copy
-        linked_motion_sensor: binary_sensor.cat_room_motion
 
 # TODO: remove after Phase 1 — dummy accessory so the HomeKit bridge has
 # something to expose for the mDNS/pairing test before the HVAC nodes exist.

@@ -104,15 +104,6 @@ views:
               columns: 12
             entities:
               - binary_sensor.dining_room_motion
-          - type: picture-glance
-            title: Cat Room
-            camera_image: camera.cat_room
-            camera_view: auto
-            aspect_ratio: 16x9
-            grid_options:
-              columns: 12
-            entities:
-              - binary_sensor.cat_room_motion
       - type: grid
         column_span: 2
         cards:
@@ -130,4 +121,3 @@ views:
               - binary_sensor.front_side_motion
               - binary_sensor.back_side_motion
               - binary_sensor.dining_room_motion
-              - binary_sensor.cat_room_motion
