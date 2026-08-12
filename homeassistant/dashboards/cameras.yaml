@@ -26,7 +26,7 @@ views:
               - arm_home
               - arm_away
             grid_options:
-              columns: 12
+              columns: full
       - type: grid
         column_span: 2
         cards:
@@ -115,6 +115,8 @@ views:
           - type: logbook
             title: Activity
             hours_to_show: 24
+            grid_options:
+              columns: full
             entities:
               - binary_sensor.front_door_ding
               - binary_sensor.front_door_motion
