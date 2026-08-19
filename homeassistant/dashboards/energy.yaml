@@ -11,6 +11,10 @@
 # The built-in HA Energy view (/energy) is wired separately via .storage/energy.
 title: Power
 views:
+  # Second view "Energy" rebuilds the built-in /energy screen with a layout we
+  # control (the stock energy view is strategy-generated: one narrow column,
+  # lots of dead space). Same data — the energy-* cards read the same
+  # .storage/energy config and long-term statistics.
   - title: Power
     path: power
     type: sections
@@ -276,3 +280,42 @@ views:
               - entity: sensor.energy_monitor_garage_power
                 name: Garage
                 color: "#26a0a8"
+
+  - title: Energy
+    path: energy
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: energy-date-selection
+      - type: grid
+        cards:
+          - type: heading
+            heading: Distribution
+          - type: energy-distribution
+          - type: energy-sources-table
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Usage
+          - type: energy-usage-graph
+      - type: grid
+        cards:
+          - type: heading
+            heading: By device
+          - type: energy-devices-graph
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: Devices over time
+          - type: energy-devices-detail-graph
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Flow
+          - type: energy-sankey
