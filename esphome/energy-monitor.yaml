@@ -24,7 +24,9 @@ esp32:
     type: esp-idf
 
 preferences:
-  flash_write_interval: 48h # protect flash; total_daily_energy restores are not critical
+  # 15min: daily-energy counters restore across reboots (OTA flashes and power
+  # blips were zeroing them mid-day); NVS wear-levels, so ~100 writes/day is fine.
+  flash_write_interval: 15min
 
 logger:
 
@@ -170,20 +172,20 @@ sensor:
         - id(power_kitchen_lights).state - id(power_laundry).state
         - id(power_garage).state;
   # --- energy (kWh) for the HA Energy dashboard ---
-  - { platform: total_daily_energy, name: Total Daily Energy, power_id: power_total, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Other Daily Energy, power_id: power_other, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: HVAC Outdoor Daily Energy, power_id: power_hvac, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: HVAC Indoor Units Daily Energy, power_id: power_hvac_indoor, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Dryer Daily Energy, power_id: power_dryer, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Living Room Daily Energy, power_id: power_living, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Kitchen Lights Daily Energy, power_id: power_kitchen_lights, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Garage Daily Energy, power_id: power_garage, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Laundry Outlets Daily Energy, power_id: power_laundry, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Master Daily Energy, power_id: power_master, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Family Room Daily Energy, power_id: power_family, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Bedroom 1 Daily Energy, power_id: power_bed1, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Nursery Daily Energy, power_id: power_nursery, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Water Heater Daily Energy, power_id: power_water_heater, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Dishwasher Daily Energy, power_id: power_dishwasher, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Refrigerator Daily Energy, power_id: power_fridge, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Kitchen Outlets Daily Energy, power_id: power_kitchen_outlets, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Total Daily Energy, power_id: power_total, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Other Daily Energy, power_id: power_other, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: HVAC Outdoor Daily Energy, power_id: power_hvac, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: HVAC Indoor Units Daily Energy, power_id: power_hvac_indoor, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Dryer Daily Energy, power_id: power_dryer, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Living Room Daily Energy, power_id: power_living, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Lights Daily Energy, power_id: power_kitchen_lights, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Garage Daily Energy, power_id: power_garage, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Laundry Outlets Daily Energy, power_id: power_laundry, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Master Daily Energy, power_id: power_master, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Family Room Daily Energy, power_id: power_family, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Bedroom 1 Daily Energy, power_id: power_bed1, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Nursery Daily Energy, power_id: power_nursery, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Water Heater Daily Energy, power_id: power_water_heater, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Dishwasher Daily Energy, power_id: power_dishwasher, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Refrigerator Daily Energy, power_id: power_fridge, restore: true, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Outlets Daily Energy, power_id: power_kitchen_outlets, restore: true, filters: [throttle: 60s] }
