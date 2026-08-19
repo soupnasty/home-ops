@@ -290,37 +290,52 @@ views:
         column_span: 2
         cards:
           - type: energy-date-selection
+            grid_options:
+              columns: full
       - type: grid
         cards:
           - type: heading
             heading: Distribution
           - type: energy-distribution
+            grid_options:
+              columns: full
       - type: grid
+        column_span: 2
         cards:
           - type: heading
             heading: Sources
           - type: energy-sources-table
+            grid_options:
+              columns: full
       - type: grid
         column_span: 2
         cards:
           - type: heading
             heading: Usage
           - type: energy-usage-graph
+            grid_options:
+              columns: full
       - type: grid
         column_span: 2
         cards:
           - type: heading
             heading: By device
           - type: energy-devices-graph
+            grid_options:
+              columns: full
       - type: grid
         column_span: 2
         cards:
           - type: heading
             heading: Devices over time
           - type: energy-devices-detail-graph
+            grid_options:
+              columns: full
       - type: grid
         column_span: 2
         cards:
           - type: heading
             heading: Flow
           - type: energy-sankey
+            grid_options:
+              columns: full
