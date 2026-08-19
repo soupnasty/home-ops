@@ -10,7 +10,7 @@ views:
   - title: Power
     path: power
     type: sections
-    max_columns: 2
+    max_columns: 3
     sections:
       - type: grid
         cards:
@@ -41,13 +41,21 @@ views:
             entity: sensor.energy_monitor_main_b_power
             name: Main B
             icon: mdi:transmission-tower
+          - type: tile
+            entity: sensor.energy_monitor_phase_a_voltage
+            name: Phase A
+            icon: mdi:sine-wave
+          - type: tile
+            entity: sensor.energy_monitor_phase_b_voltage
+            name: Phase B
+            icon: mdi:sine-wave
       - type: grid
         cards:
           - type: heading
             heading: Circuits
           - type: tile
             entity: sensor.energy_monitor_hvac_indoor_units_power
-            name: HVAC indoor units
+            name: HVAC indoor
           - type: tile
             entity: sensor.energy_monitor_living_room_power
             name: Living room
@@ -120,21 +128,9 @@ views:
                 name: Dishwasher
               - entity: sensor.energy_monitor_garage_daily_energy
                 name: Garage
-      - type: grid
-        cards:
-          - type: heading
-            heading: Grid
-          - type: tile
-            entity: sensor.energy_monitor_phase_a_voltage
-            name: Phase A
-            icon: mdi:sine-wave
-          - type: tile
-            entity: sensor.energy_monitor_phase_b_voltage
-            name: Phase B
-            icon: mdi:sine-wave
 
       - type: grid
-        column_span: 2
+        column_span: 3
         cards:
           - type: heading
             heading: History
