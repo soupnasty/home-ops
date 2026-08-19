@@ -44,6 +44,11 @@ views:
             icon: mdi:counter
             color: primary
           - type: tile
+            entity: sensor.energy_cost_today
+            name: Cost today
+            icon: mdi:currency-usd
+            color: primary
+          - type: tile
             entity: sensor.energy_monitor_phase_a_voltage
             name: Phase A
             icon: mdi:sine-wave

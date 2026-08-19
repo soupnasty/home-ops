@@ -138,6 +138,19 @@ input_number:
     unit_of_measurement: °F
     icon: mdi:thermometer-alert
 
+  # Electricity price for the Power dashboard's "Cost today" sensor —
+  # adjustable from the app when rates change (all-in marginal rate from the
+  # Dominion bill: (total − customer charge) / kWh). Set to 0.145 on deploy
+  # (2026-08-19); value persists across restarts (no initial: on purpose).
+  electricity_price:
+    name: Electricity Price
+    min: 0
+    max: 1
+    step: 0.001
+    unit_of_measurement: $/kWh
+    icon: mdi:currency-usd
+    mode: box
+
 input_datetime:
   upstairs_setback_start:
     name: Upstairs Setback Start
@@ -177,3 +190,17 @@ template:
         unit_of_measurement: °F
         state: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') }}"
         availability: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') is not none }}"
+      # Whole-home cost so far today: Vue daily energy (Wh) × electricity price.
+      # Resets at midnight with the underlying counter.
+      - name: "Energy Cost Today"
+        unique_id: energy_cost_today
+        device_class: monetary
+        state_class: total
+        unit_of_measurement: USD
+        icon: mdi:currency-usd
+        state: >-
+          {{ (states('sensor.energy_monitor_total_daily_energy') | float(0) / 1000
+              * states('input_number.electricity_price') | float(0)) | round(2) }}
+        availability: >-
+          {{ states('sensor.energy_monitor_total_daily_energy') | is_number
+             and states('input_number.electricity_price') | is_number }}
