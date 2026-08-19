@@ -307,7 +307,7 @@ views:
             graph_span: 24h
             header:
               show: true
-              title: Rooms & plugs — last 24h
+              title: Rooms — last 24h
               show_states: true
               colorize_states: true
             yaxis:
@@ -347,6 +347,11 @@ views:
               - entity: sensor.energy_monitor_nursery_power
                 name: Nursery
                 color: "#d55181"
-              - entity: sensor.energy_monitor_refrigerator_power
-                name: Refrigerator
+              - entity: sensor.energy_monitor_kitchen_outlets_power
+                name: Kitchen
                 color: "#9b7ce6"
+              # 7th slot #26a0a8 (teal) validated 2026-08-19 against the other
+              # six on the dark surface — all checks pass.
+              - entity: sensor.energy_monitor_garage_power
+                name: Garage
+                color: "#26a0a8"
