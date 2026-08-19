@@ -284,10 +284,10 @@ views:
   - title: Energy
     path: energy
     type: sections
-    max_columns: 3
+    max_columns: 2
     sections:
       - type: grid
-        column_span: 3
+        column_span: 2
         cards:
           - type: energy-date-selection
       - type: grid
@@ -295,6 +295,10 @@ views:
           - type: heading
             heading: Distribution
           - type: energy-distribution
+      - type: grid
+        cards:
+          - type: heading
+            heading: Sources
           - type: energy-sources-table
       - type: grid
         column_span: 2
@@ -303,6 +307,7 @@ views:
             heading: Usage
           - type: energy-usage-graph
       - type: grid
+        column_span: 2
         cards:
           - type: heading
             heading: By device
@@ -314,7 +319,7 @@ views:
             heading: Devices over time
           - type: energy-devices-detail-graph
       - type: grid
-        column_span: 3
+        column_span: 2
         cards:
           - type: heading
             heading: Flow
