@@ -140,8 +140,9 @@ input_number:
 
   # Electricity price for the Power dashboard's "Cost today" sensor —
   # adjustable from the app when rates change (all-in marginal rate from the
-  # Dominion bill: (total − customer charge) / kWh). Set to 0.145 on deploy
-  # (2026-08-19); value persists across restarts (no initial: on purpose).
+  # Dominion bill: (total − basic customer charge) / kWh; Jul 2026 bill:
+  # (233.46 − 6.58) / 1258 = 0.180). Set in-app on deploy 2026-08-19;
+  # value persists across restarts (no initial: on purpose).
   electricity_price:
     name: Electricity Price
     min: 0
