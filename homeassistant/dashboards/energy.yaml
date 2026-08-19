@@ -69,8 +69,8 @@ views:
           - type: heading
             heading: Circuits
           - type: tile
-            entity: sensor.energy_monitor_heat_pump_power
-            name: Heat pump
+            entity: sensor.energy_monitor_hvac_outdoor_power
+            name: HVAC outdoor
             icon: mdi:heat-pump
           - type: tile
             entity: sensor.energy_monitor_water_heater_power
@@ -150,8 +150,8 @@ views:
               include:
                 - entity_id: sensor.energy_monitor_total_daily_energy
                   options: { name: Whole home, icon: mdi:home-lightning-bolt }
-                - entity_id: sensor.energy_monitor_heat_pump_daily_energy
-                  options: { name: Heat pump, icon: mdi:heat-pump }
+                - entity_id: sensor.energy_monitor_hvac_outdoor_daily_energy
+                  options: { name: HVAC outdoor, icon: mdi:heat-pump }
                 - entity_id: sensor.energy_monitor_water_heater_daily_energy
                   options: { name: Water heater, icon: mdi:water-boiler }
                 - entity_id: sensor.energy_monitor_dryer_daily_energy
@@ -289,8 +289,8 @@ views:
                 extremas: false
                 legend_value: false
             series:
-              - entity: sensor.energy_monitor_heat_pump_power
-                name: Heat pump
+              - entity: sensor.energy_monitor_hvac_outdoor_power
+                name: HVAC outdoor
                 color: "#3987e5"
               - entity: sensor.energy_monitor_water_heater_power
                 name: Water heater
