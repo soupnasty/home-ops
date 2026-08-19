@@ -121,8 +121,9 @@ sensor:
       - { phase_id: phase_a, input: "10", power: { id: power_bed1, name: Bedroom 1 Power, filters: [throttle_average: 5s] } } # breaker 15
       - { phase_id: phase_a, input: "11", power: { id: power_family_b, name: Family Room L2 Power, internal: true, filters: [throttle_average: 5s] } } # breaker 19
       - { phase_id: phase_b, input: "12", power: { id: power_nursery, name: Nursery Power, filters: [throttle_average: 5s] } } # breaker 21
-      # Water heater (24/26): pure 240V. Sign unverified (idle at flash time) — if it
-      # reads negative while heating (~4.5kW), flip this phase_id.
+      # Water heater (24/26): pure 240V. Sign verified 2026-08-19 under load
+      # (+5880W while heating — 5500W element at ~245V) after Andrew re-clamped
+      # the CT onto the other conductor.
       - { phase_id: phase_b, input: "13", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, throttle_average: 5s] } }
       - { phase_id: phase_b, input: "14", power: { id: power_dishwasher, name: Dishwasher Power, filters: [throttle_average: 5s] } } # breaker 25
       - { phase_id: phase_a, input: "15", power: { id: power_fridge, name: Refrigerator Power, filters: [throttle_average: 5s] } } # breaker 28
