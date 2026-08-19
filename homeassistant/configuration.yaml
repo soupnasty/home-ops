@@ -21,6 +21,11 @@ lovelace:
       title: Cameras
       icon: mdi:cctv
       filename: dashboards/cameras.yaml
+    energy-usage:
+      mode: yaml
+      title: Energy
+      icon: mdi:flash
+      filename: dashboards/energy.yaml
 
 # HomeKit is a projection: curated subset only, climate first.
 # First entry = the original bridge (do not rename/re-port — paired in Apple Home).
