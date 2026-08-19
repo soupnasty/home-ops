@@ -23,7 +23,7 @@ lovelace:
       filename: dashboards/cameras.yaml
     energy-usage:
       mode: yaml
-      title: Energy
+      title: Power
       icon: mdi:flash
       filename: dashboards/energy.yaml
 

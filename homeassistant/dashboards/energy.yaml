@@ -93,41 +93,50 @@ views:
         cards:
           - type: heading
             heading: Today
-          - type: entities
-            entities:
-              - entity: sensor.energy_monitor_total_daily_energy
-                name: Whole home
-              - type: divider
-              - entity: sensor.energy_monitor_heat_pump_daily_energy
-                name: Heat pump
-              - entity: sensor.energy_monitor_water_heater_daily_energy
-                name: Water heater
-              - entity: sensor.energy_monitor_dryer_daily_energy
-                name: Dryer
-              - entity: sensor.energy_monitor_hvac_indoor_units_daily_energy
-                name: HVAC indoor units
-              - entity: sensor.energy_monitor_living_room_daily_energy
-                name: Living room
-              - entity: sensor.energy_monitor_family_room_daily_energy
-                name: Family room
-              - entity: sensor.energy_monitor_refrigerator_daily_energy
-                name: Refrigerator
-              - entity: sensor.energy_monitor_master_daily_energy
-                name: Master
-              - entity: sensor.energy_monitor_bedroom_1_daily_energy
-                name: Bedroom 1
-              - entity: sensor.energy_monitor_nursery_daily_energy
-                name: Nursery
-              - entity: sensor.energy_monitor_kitchen_outlets_daily_energy
-                name: Kitchen outlets
-              - entity: sensor.energy_monitor_kitchen_lights_daily_energy
-                name: Kitchen lights
-              - entity: sensor.energy_monitor_laundry_outlets_daily_energy
-                name: Laundry outlets
-              - entity: sensor.energy_monitor_dishwasher_daily_energy
-                name: Dishwasher
-              - entity: sensor.energy_monitor_garage_daily_energy
-                name: Garage
+          # auto-entities (www/auto-entities.js, registered in
+          # .storage/lovelace_resources): live-sorted highest→lowest by state.
+          # Whole home is the sum, so it always sorts to the top.
+          - type: custom:auto-entities
+            card:
+              type: entities
+            sort:
+              method: state
+              numeric: true
+              reverse: true
+            filter:
+              include:
+                - entity_id: sensor.energy_monitor_total_daily_energy
+                  options: { name: Whole home }
+                - entity_id: sensor.energy_monitor_heat_pump_daily_energy
+                  options: { name: Heat pump }
+                - entity_id: sensor.energy_monitor_water_heater_daily_energy
+                  options: { name: Water heater }
+                - entity_id: sensor.energy_monitor_dryer_daily_energy
+                  options: { name: Dryer }
+                - entity_id: sensor.energy_monitor_hvac_indoor_units_daily_energy
+                  options: { name: HVAC indoor }
+                - entity_id: sensor.energy_monitor_living_room_daily_energy
+                  options: { name: Living room }
+                - entity_id: sensor.energy_monitor_family_room_daily_energy
+                  options: { name: Family room }
+                - entity_id: sensor.energy_monitor_refrigerator_daily_energy
+                  options: { name: Refrigerator }
+                - entity_id: sensor.energy_monitor_master_daily_energy
+                  options: { name: Master }
+                - entity_id: sensor.energy_monitor_bedroom_1_daily_energy
+                  options: { name: Bedroom 1 }
+                - entity_id: sensor.energy_monitor_nursery_daily_energy
+                  options: { name: Nursery }
+                - entity_id: sensor.energy_monitor_kitchen_outlets_daily_energy
+                  options: { name: Kitchen outlets }
+                - entity_id: sensor.energy_monitor_kitchen_lights_daily_energy
+                  options: { name: Kitchen lights }
+                - entity_id: sensor.energy_monitor_laundry_outlets_daily_energy
+                  options: { name: Laundry outlets }
+                - entity_id: sensor.energy_monitor_dishwasher_daily_energy
+                  options: { name: Dishwasher }
+                - entity_id: sensor.energy_monitor_garage_daily_energy
+                  options: { name: Garage }
 
       - type: grid
         column_span: 3
