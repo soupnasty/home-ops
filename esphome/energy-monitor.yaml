@@ -107,8 +107,10 @@ sensor:
       # The earlier condensate-pump theory for 1/3 is dead.
       - { phase_id: phase_a, input: "1", power: { id: power_hvac, name: Heat Pump Power, filters: [multiply: 2, throttle_average: 5s] } }
       - { phase_id: phase_b, input: "2", power: { id: power_hvac_indoor, name: HVAC Indoor Units Power, filters: [multiply: 2, throttle_average: 5s] } }
-      # Dryer (2/4): 120/240V, single CT x2 (accepts ~100-200W error from the 120V motor leg)
-      - { phase_id: phase_a, input: "3", power: { id: power_dryer, name: Dryer Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # Dryer (2/4): 120/240V, single CT x2 (accepts ~100-200W error from the 120V motor leg).
+      # Dead-band: true idle is exactly 0W, so clamp the ±0.5W CT noise (else the
+      # daily counter drifts slightly negative overnight).
+      - { phase_id: phase_a, input: "3", power: { id: power_dryer, name: Dryer Power, filters: [multiply: 2, 'lambda': 'return fabsf(x) < 2.0f ? 0.0f : x;', throttle_average: 5s] } }
       - { phase_id: phase_b, input: "4", power: { id: power_living, name: Living Room Power, filters: [throttle_average: 5s] } } # breaker 6
       - { phase_id: phase_b, input: "5", power: { id: power_kitchen_lights, name: Kitchen Lights Power, filters: [throttle_average: 5s] } } # breaker 8
       # Garage outlets (9) + lights (13) share one CT: same leg (rows 5 & 7), so both
@@ -123,8 +125,9 @@ sensor:
       - { phase_id: phase_b, input: "12", power: { id: power_nursery, name: Nursery Power, filters: [throttle_average: 5s] } } # breaker 21
       # Water heater (24/26): pure 240V. Sign verified 2026-08-19 under load
       # (+5880W while heating — 5500W element at ~245V) after Andrew re-clamped
-      # the CT onto the other conductor.
-      - { phase_id: phase_b, input: "13", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # the CT onto the other conductor. Dead-band like the dryer: resistive
+      # element idles at exactly 0W.
+      - { phase_id: phase_b, input: "13", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, 'lambda': 'return fabsf(x) < 2.0f ? 0.0f : x;', throttle_average: 5s] } }
       - { phase_id: phase_b, input: "14", power: { id: power_dishwasher, name: Dishwasher Power, filters: [throttle_average: 5s] } } # breaker 25
       - { phase_id: phase_a, input: "15", power: { id: power_fridge, name: Refrigerator Power, filters: [throttle_average: 5s] } } # breaker 28
       - { phase_id: phase_a, input: "16", power: { id: power_kitchen_outlets, name: Kitchen Outlets Power, filters: [throttle_average: 5s] } } # breaker 35

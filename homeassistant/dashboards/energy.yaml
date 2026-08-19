@@ -202,6 +202,7 @@ views:
                 min: 0
                 apex_config:
                   tickAmount: 4
+                  forceNiceScale: true
             apex_config:
               chart:
                 height: 260
@@ -211,7 +212,7 @@ views:
               stroke_width: 2
               group_by:
                 func: avg
-                duration: 10min
+                duration: 5min
               show:
                 extremas: false
                 legend_value: false
@@ -221,6 +222,42 @@ views:
                 color: "#3987e5"
                 type: area
                 opacity: 0.15
+          # Hourly kWh bars from long-term statistics — answers "when did the
+          # energy go" (the power lines above answer "what shape is the load").
+          # Statistics compile at the top of each hour, so the current hour
+          # appears only after it closes.
+          - type: custom:apexcharts-card
+            grid_options:
+              columns: full
+            graph_span: 24h
+            span:
+              end: hour
+            header:
+              show: true
+              title: Energy by hour — last 24h
+              show_states: false
+            yaxis:
+              - decimals: 1
+                min: 0
+                apex_config:
+                  tickAmount: 4
+                  forceNiceScale: true
+            apex_config:
+              chart:
+                height: 260
+              grid:
+                borderColor: "rgba(255, 255, 255, 0.08)"
+            series:
+              - entity: sensor.energy_monitor_total_daily_energy
+                name: Energy
+                color: "#3987e5"
+                type: column
+                unit: kWh
+                float_precision: 2
+                transform: return x / 1000;
+                statistics:
+                  type: change
+                  period: hour
           - type: custom:apexcharts-card
             grid_options:
               columns: full
@@ -235,6 +272,7 @@ views:
                 min: 0
                 apex_config:
                   tickAmount: 4
+                  forceNiceScale: true
             apex_config:
               chart:
                 height: 300
@@ -246,7 +284,7 @@ views:
               stroke_width: 2
               group_by:
                 func: avg
-                duration: 10min
+                duration: 5min
               show:
                 extremas: false
                 legend_value: false
@@ -277,6 +315,7 @@ views:
                 min: 0
                 apex_config:
                   tickAmount: 4
+                  forceNiceScale: true
             apex_config:
               chart:
                 height: 300
@@ -288,7 +327,7 @@ views:
               stroke_width: 2
               group_by:
                 func: avg
-                duration: 10min
+                duration: 5min
               show:
                 extremas: false
                 legend_value: false
