@@ -146,8 +146,29 @@ sensor:
     state_class: measurement
     update_interval: 5s
     lambda: return id(power_family_a).state + id(power_family_b).state;
+  # Unmetered remainder: whole home minus all 16 branch channels. Shows what
+  # the uncovered breakers (disposal, etc.) draw; should stay small and never
+  # strongly negative (strongly negative = a branch channel double-counting).
+  - platform: template
+    id: power_other
+    name: Other Power
+    unit_of_measurement: W
+    device_class: power
+    state_class: measurement
+    update_interval: 5s
+    lambda: |-
+      return id(power_total).state
+        - id(power_hvac).state - id(power_hvac_indoor).state
+        - id(power_dryer).state - id(power_water_heater).state
+        - id(power_living).state - id(power_family).state
+        - id(power_master).state - id(power_bed1).state
+        - id(power_nursery).state - id(power_fridge).state
+        - id(power_dishwasher).state - id(power_kitchen_outlets).state
+        - id(power_kitchen_lights).state - id(power_laundry).state
+        - id(power_garage).state;
   # --- energy (kWh) for the HA Energy dashboard ---
   - { platform: total_daily_energy, name: Total Daily Energy, power_id: power_total, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Other Daily Energy, power_id: power_other, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Heat Pump Daily Energy, power_id: power_hvac, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: HVAC Indoor Units Daily Energy, power_id: power_hvac_indoor, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Dryer Daily Energy, power_id: power_dryer, restore: false, filters: [throttle: 60s] }
