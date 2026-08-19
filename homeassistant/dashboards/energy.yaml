@@ -49,13 +49,6 @@ views:
             icon: mdi:currency-usd
             color: primary
           - type: tile
-            entity: input_number.electricity_price
-            name: Rate
-            icon: mdi:cash-edit
-            features:
-              - type: numeric-input
-                style: buttons
-          - type: tile
             entity: sensor.energy_monitor_phase_a_voltage
             name: Phase A
             icon: mdi:sine-wave
@@ -63,6 +56,13 @@ views:
             entity: sensor.energy_monitor_phase_b_voltage
             name: Phase B
             icon: mdi:sine-wave
+          - type: tile
+            entity: input_number.electricity_price
+            name: Rate
+            icon: mdi:cash-edit
+            features:
+              - type: numeric-input
+                style: buttons
 
       - type: grid
         cards:
