@@ -68,50 +68,65 @@ sensor:
     variant: vue3
     i2c_id: i2c_vue
     phases:
-      - id: phase_a # black harness wire (L1)
+      # Install-day finding (2026-08-19): the harness wires landed on the OPPOSITE
+      # legs from the plan — black is NOT on the same leg as the left service
+      # conductor the A-clamp is on. Fixed in hardware by swapping the two main CT
+      # plugs at the Vue (A-port clamp and B-port clamp trade conductors), which
+      # made both mains read positive. So: phase_a = the leg the BLACK harness
+      # breaker sits on; which physical rows of the panel that corresponds to is
+      # UNVERIFIED. When adding a branch CT, guess its phase_id, and if it reads
+      # negative under load, flip the phase_id (magnitude is unaffected).
+      - id: phase_a
         input: BLACK
         calibration: 0.01925
         voltage:
           name: Phase A Voltage
           filters: [throttle_average: 5s]
-      - id: phase_b # red harness wire (L2)
+      - id: phase_b
         input: RED
         calibration: 0.01925
         voltage:
           name: Phase B Voltage
           filters: [throttle_average: 5s]
     ct_clamps:
-      # --- mains ---
+      # --- mains (CT plugs deliberately swapped at the device — see note above) ---
       - { phase_id: phase_a, input: "A", power: { id: power_main_a, name: Main A Power, filters: [throttle_average: 5s] } }
       - { phase_id: phase_b, input: "B", power: { id: power_main_b, name: Main B Power, filters: [throttle_average: 5s] } }
-      # --- branch CTs (input = port number on the Vue) ---
-      # Heat pump: breakers 5/7 feed the outdoor unit = ALL HVAC (flip-test verified
-      # 2026-08-11: killing 5/7 dropped all six heads; killing 1/3 affected nothing).
-      # Pure 240V -> single CT x2.
+      # --- branch CTs (input = port number on the Vue; as-built 2026-08-19) ---
+      # phase_id guesses use QO row parity (legs alternate per ROW; row = ceil(pos/2)):
+      # odd rows -> phase_a, even rows -> phase_b. Which leg is actually phase_a is
+      # unverified — if a channel reads negative under load, flip its phase_id
+      # (magnitude is unaffected); if roughly half read negative, the parity guess
+      # is inverted — flip them all. 240V 2-pole circuits have one CT on one hot
+      # with multiply: 2; their phase_id = whichever leg the clamped conductor is on.
+      #
+      # HVAC model corrected 2026-08-19 with live data: 1/3 = OUTDOOR UNIT (compressor;
+      # read ~2.6kW while cooling), 5/7 = indoor heads on their own 240V circuit
+      # (~50W; killing 5/7 blacks out every panel instantly, killing 1/3 leaves heads
+      # powered until they self-shutdown staggered 25-45 min later on lost comms).
+      # The earlier condensate-pump theory for 1/3 is dead.
       - { phase_id: phase_a, input: "1", power: { id: power_hvac, name: Heat Pump Power, filters: [multiply: 2, throttle_average: 5s] } }
-      # Breakers 1/3: 2-pole labeled HVAC but feeds nothing observable (legacy?).
-      # CT stays on it as a watchdog - should read 0W forever; if it ever shows
-      # load, we found what it feeds.
-      - { phase_id: phase_a, input: "2", power: { id: power_mystery_13, name: Breaker 1-3 Power, filters: [multiply: 2, throttle_average: 5s] } }
-      # Dryer (breakers 2/4): has neutral -> CT per leg, summed below
-      - { phase_id: phase_a, input: "3", power: { id: power_dryer_l1, name: Dryer L1 Power, internal: true, filters: [throttle_average: 5s] } }
-      - { phase_id: phase_b, input: "4", power: { id: power_dryer_l2, name: Dryer L2 Power, internal: true, filters: [throttle_average: 5s] } }
-      # Water heater (breakers 24/26): pure 240V -> single CT x2
-      - { phase_id: phase_a, input: "5", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, throttle_average: 5s] } }
-      # Range (breaker 33): single slot in the directory -> likely gas range,
-      # 120V circuit. VERIFY pole count on install day; if it turns out 2-pole,
-      # clamp the second leg into port 13 and convert to a summed pair like dryer.
-      - { phase_id: phase_a, input: "6", power: { id: power_range, name: Range Power, filters: [throttle_average: 5s] } }
-      # 120V kitchen + laundry circuits
-      - { phase_id: phase_a, input: "7", power: { id: power_fridge, name: Refrigerator Power, filters: [throttle_average: 5s] } }
-      - { phase_id: phase_a, input: "8", power: { id: power_microwave, name: Microwave Power, filters: [throttle_average: 5s] } }
-      - { phase_id: phase_a, input: "9", power: { id: power_dishwasher, name: Dishwasher Power, filters: [throttle_average: 5s] } } # breaker 25 (sheet corrected; 22 is the disposal)
-      - { phase_id: phase_a, input: "10", power: { id: power_counter_1, name: Kitchen Countertop 30 Power, filters: [throttle_average: 5s] } }
-      - { phase_id: phase_b, input: "11", power: { id: power_counter_2, name: Kitchen Countertop 35 Power, filters: [throttle_average: 5s] } }
-      - { phase_id: phase_a, input: "12", power: { id: power_laundry, name: Laundry Power, filters: [throttle_average: 5s] } } # breaker 11 (washer) — freed CT put to work
-      # Ports 13-16 spare. NOTE: phase_id assignments for branch CTs above are
-      # provisional - set each to the leg its breaker actually sits on (matters
-      # for power-factor accuracy, discovered at install).
+      - { phase_id: phase_b, input: "2", power: { id: power_hvac_indoor, name: HVAC Indoor Units Power, filters: [multiply: 2, throttle_average: 5s] } }
+      # Dryer (2/4): 120/240V, single CT x2 (accepts ~100-200W error from the 120V motor leg)
+      - { phase_id: phase_a, input: "3", power: { id: power_dryer, name: Dryer Power, filters: [multiply: 2, throttle_average: 5s] } }
+      - { phase_id: phase_b, input: "4", power: { id: power_living, name: Living Room Power, filters: [throttle_average: 5s] } } # breaker 6
+      - { phase_id: phase_b, input: "5", power: { id: power_kitchen_lights, name: Kitchen Lights Power, filters: [throttle_average: 5s] } } # breaker 8
+      # Garage outlets (9) + lights (13) share one CT: same leg (rows 5 & 7), so both
+      # wires pass through the clamp in the SAME direction, x1.
+      - { phase_id: phase_a, input: "6", power: { id: power_garage, name: Garage Power, filters: [throttle_average: 5s] } }
+      - { phase_id: phase_a, input: "7", power: { id: power_laundry, name: Laundry Outlets Power, filters: [throttle_average: 5s] } } # breaker 11
+      - { phase_id: phase_a, input: "8", power: { id: power_master, name: Master Power, filters: [throttle_average: 5s] } } # breaker 12
+      # Family room is an MWBC on handle-tied 17/19 (opposite legs) -> CT per leg, summed below
+      - { phase_id: phase_b, input: "9", power: { id: power_family_a, name: Family Room L1 Power, internal: true, filters: [throttle_average: 5s] } } # breaker 17
+      - { phase_id: phase_a, input: "10", power: { id: power_bed1, name: Bedroom 1 Power, filters: [throttle_average: 5s] } } # breaker 15
+      - { phase_id: phase_a, input: "11", power: { id: power_family_b, name: Family Room L2 Power, internal: true, filters: [throttle_average: 5s] } } # breaker 19
+      - { phase_id: phase_b, input: "12", power: { id: power_nursery, name: Nursery Power, filters: [throttle_average: 5s] } } # breaker 21
+      # Water heater (24/26): pure 240V. Sign unverified (idle at flash time) — if it
+      # reads negative while heating (~4.5kW), flip this phase_id.
+      - { phase_id: phase_b, input: "13", power: { id: power_water_heater, name: Water Heater Power, filters: [multiply: 2, throttle_average: 5s] } }
+      - { phase_id: phase_b, input: "14", power: { id: power_dishwasher, name: Dishwasher Power, filters: [throttle_average: 5s] } } # breaker 25
+      - { phase_id: phase_a, input: "15", power: { id: power_fridge, name: Refrigerator Power, filters: [throttle_average: 5s] } } # breaker 28
+      - { phase_id: phase_a, input: "16", power: { id: power_kitchen_outlets, name: Kitchen Outlets Power, filters: [throttle_average: 5s] } } # breaker 35
 
   # --- derived totals ---
   - platform: template
@@ -123,22 +138,27 @@ sensor:
     update_interval: 5s
     lambda: return id(power_main_a).state + id(power_main_b).state;
   - platform: template
-    id: power_dryer
-    name: Dryer Power
+    id: power_family
+    name: Family Room Power
     unit_of_measurement: W
     device_class: power
     state_class: measurement
     update_interval: 5s
-    lambda: return id(power_dryer_l1).state + id(power_dryer_l2).state;
+    lambda: return id(power_family_a).state + id(power_family_b).state;
   # --- energy (kWh) for the HA Energy dashboard ---
   - { platform: total_daily_energy, name: Total Daily Energy, power_id: power_total, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Heat Pump Daily Energy, power_id: power_hvac, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: HVAC Indoor Units Daily Energy, power_id: power_hvac_indoor, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Dryer Daily Energy, power_id: power_dryer, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Living Room Daily Energy, power_id: power_living, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Lights Daily Energy, power_id: power_kitchen_lights, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Garage Daily Energy, power_id: power_garage, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Laundry Outlets Daily Energy, power_id: power_laundry, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Master Daily Energy, power_id: power_master, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Family Room Daily Energy, power_id: power_family, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Bedroom 1 Daily Energy, power_id: power_bed1, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Nursery Daily Energy, power_id: power_nursery, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Water Heater Daily Energy, power_id: power_water_heater, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Range Daily Energy, power_id: power_range, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Refrigerator Daily Energy, power_id: power_fridge, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Microwave Daily Energy, power_id: power_microwave, restore: false, filters: [throttle: 60s] }
   - { platform: total_daily_energy, name: Dishwasher Daily Energy, power_id: power_dishwasher, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Kitchen Countertop 30 Daily Energy, power_id: power_counter_1, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Kitchen Countertop 35 Daily Energy, power_id: power_counter_2, restore: false, filters: [throttle: 60s] }
-  - { platform: total_daily_energy, name: Laundry Daily Energy, power_id: power_laundry, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Refrigerator Daily Energy, power_id: power_fridge, restore: false, filters: [throttle: 60s] }
+  - { platform: total_daily_energy, name: Kitchen Outlets Daily Energy, power_id: power_kitchen_outlets, restore: false, filters: [throttle: 60s] }
