@@ -1,6 +1,9 @@
+# Instrumented room: includes remote-temp package.
 substitutions:
   name: hvac-master
   friendly_name: Master Bedroom HVAC
+  remote_sensor_entity: sensor.master_sensor_temperature
 
 packages:
   cassette: !include common/cn105-cassette.yaml
+  remote_temp: !include common/remote-temp.yaml

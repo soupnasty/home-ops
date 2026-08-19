@@ -8,3 +8,9 @@ substitutions:
 packages:
   cassette: !include common/cn105-cassette.yaml
   remote_temp: !include common/remote-temp.yaml
+
+# TEMP (2026-08-11): full tracing to catch the mystery mass-off at the wire —
+# distinguishes API-inbound climate commands from unit-side state changes.
+# Revert once the off-source is identified.
+logger:
+  level: VERY_VERBOSE

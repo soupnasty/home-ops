@@ -1,6 +1,9 @@
+# Instrumented room: includes remote-temp package.
 substitutions:
   name: hvac-kitchen
   friendly_name: Kitchen HVAC
+  remote_sensor_entity: sensor.kitchen_sensor_temperature
 
 packages:
   cassette: !include common/cn105-cassette.yaml
+  remote_temp: !include common/remote-temp.yaml

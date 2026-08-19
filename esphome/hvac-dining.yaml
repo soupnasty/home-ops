@@ -1,6 +1,9 @@
+# Instrumented room: includes remote-temp package.
 substitutions:
   name: hvac-dining
   friendly_name: Dining Room HVAC
+  remote_sensor_entity: sensor.dining_sensor_temperature
 
 packages:
   cassette: !include common/cn105-cassette.yaml
+  remote_temp: !include common/remote-temp.yaml
