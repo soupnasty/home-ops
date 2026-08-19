@@ -32,29 +32,39 @@ Goal: whole-home + per-circuit energy in HA's Energy dashboard, fully local
 | 2× Square D QO115 breakers | ~$35 | ~$17 each at big-box (2026). Power the Vue's voltage harness in the panel's empty bottom spaces (QO series, not Homeline) |
 | (optional) RP-SMA M-F extension | ~$8 | Only if antenna placement near the panel needs help |
 
-## CT allocation (from panel photo 2026-08-09 — Square D QO 42-space; cover part QOC42UF)
+## CT allocation (AS BUILT 2026-08-19 — Square D QO 42-space; cover part QOC42UF)
 
 Mains: 2× 200 A CTs on the service conductors between meter and main breaker.
+(Install-day gotcha: the voltage-harness legs landed opposite the config's assumption,
+making both mains read negative — fixed by swapping the two main CT plugs at the Vue's
+A/B ports, not by re-clamping.)
 
-Branch CTs mapped to the actual circuit directory:
+All 16 branch CTs installed 2026-08-19 (port = Vue input number, matches
+esphome/energy-monitor.yaml):
 
-| Breaker(s) | Circuit | CTs | Config notes |
+| Port | Breaker(s) | Circuit | Config notes |
 |---|---|---|---|
-| 5/7 | Heat pump (outdoor unit → all 6 heads) | 1 | Flip-test verified 2026-08-11: killing 5/7 dropped every head; single CT + `multiply: 2` (pure 240 V) measures ALL HVAC |
-| 1/3 | Mystery 2-pole labeled "HVAC" | 1 | Flip-test: feeds nothing observable — likely legacy (pre-mini-split furnace?). CT stays on as a watchdog (expect 0 W; any reading identifies it) |
-| 2/4 | Dryer | 2 (merged) | Has neutral → CT per leg, summed in config |
-| 24/26 | Water heater (electric — confirmed by directory) | 1 | Pure 240 V → single CT ×2 |
-| 33 | Range | 1 | Single slot in directory (2-pole loads are listed twice on this sheet) → likely gas range on a 120 V circuit. Verify pole count at the breaker; if 2-pole, second leg goes to spare port 13 as a summed pair |
-| 28 | Refrigerator | 1 | |
-| 29 | Microwave | 1 | |
-| 25 | Dishwasher | 1 | Confirmed from clear directory photo (22 is the disposal; labels were swap-corrected on the sheet) |
-| 30, 35 | Kitchen countertop outlets | 2 | |
-| 11 | Laundry (washer) | 1 | Added with the CT freed by the gas range |
-| — | Spare | 4 | Headroom for EV/solar later; mains CTs already bidirectional |
+| 1 | 1/3 | Heat pump (outdoor unit/compressor) | Pure 240 V → one CT ×2. Live data settled the old "mystery/watchdog" question: reads ~2.6 kW while cooling. Killing 1/3 leaves panels powered but they self-shutdown staggered 25–45 min later (lost comms) |
+| 2 | 5/7 | HVAC indoor heads (own 240 V circuit) | One CT ×2, ~50 W. Killing 5/7 blacks out every panel instantly — the 2026-08-11 HA-dropout test proved this circuit hosts the heads (where the ESP32s live), not the outdoor unit |
+| 3 | 2/4 | Dryer | 120/240 V, one CT ×2 (accepts ~100–200 W error from the 120 V motor leg) |
+| 4 | 6 | Living room | |
+| 5 | 8 | Kitchen lights | |
+| 6 | 9 & 13 | Garage outlets + lights | Two circuits, one CT: same leg (rows 5 & 7), so both wires pass through the clamp in the SAME direction, ×1 |
+| 7 | 11 | Laundry outlets | |
+| 8 | 12 | Master | |
+| 9 | 17 | Family room L1 | 17/19 is an MWBC (handle-tied, opposite legs): CT per leg, summed template sensor. ×2-on-one-leg would be wrong |
+| 10 | 15 | Bedroom 1 | |
+| 11 | 19 | Family room L2 | |
+| 12 | 21 | Nursery | |
+| 13 | 24/26 | Water heater | Pure 240 V → one CT ×2. Sign unverified (idle at flash time); flip phase_id if negative while heating |
+| 14 | 25 | Dishwasher | 22 is the disposal; labels were swap-corrected on the sheet |
+| 15 | 28 | Refrigerator | |
+| 16 | 35 | Kitchen outlets | |
 
-Total: 12 of 16 branch CTs used. Vue port order: 1=HVAC 1/3, 2=HVAC 5/7, 3/4=dryer legs,
-5=water heater, 6=range, 7=fridge, 8=microwave, 9=dishwasher, 10/11=countertops 30/35,
-12=laundry (matches esphome/energy-monitor.yaml — label CT leads before panel day). CTs clamp the hot leg at each breaker. Branch CTs are
+phase_id per channel was set empirically from live signs (QO row-parity guesses were
+~half wrong): negative under load → flip that channel's phase_id. Direction rules for
+multi-wire-through-one-CT: same leg → same direction adds; opposite legs → opposite
+directions add. CTs clamp the hot leg at each breaker. Branch CTs are
 rated 50 A but accurate through 63 A (saturate ~75 A); >63 A circuits (future EV) use a
 200 A mains-style CT on a branch port with multiplier 4.0 — on Gen 3 that means
 re-terminating the 200 A CT's wires into a 3.81 mm terminal block (the Gen 2 jack-adapter
