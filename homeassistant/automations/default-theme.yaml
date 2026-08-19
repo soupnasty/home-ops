@@ -1,0 +1,13 @@
+# Make Frosted Glass Lite the backend default so every device that keeps its
+# profile theme on "Backend-selected" gets it automatically. mode: dark pins
+# the dark variant regardless of device light/dark preference.
+- id: set_default_theme_on_start
+  alias: "Set default theme at startup"
+  triggers:
+    - trigger: homeassistant
+      event: start
+  actions:
+    - action: frontend.set_theme
+      data:
+        name: Frosted Glass Lite
+        mode: dark

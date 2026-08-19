@@ -1,38 +1,277 @@
+# HVAC dashboard (yaml mode — edits apply on browser refresh, no restart).
+# Requires apexcharts-card: www/apexcharts-card.js, registered in
+# .storage/lovelace_resources on the VM (storage-mode registry; the
+# `lovelace: resources:` YAML key only works when the main dashboard is yaml
+# mode, which ours isn't).
+# Chart colors: validated dark-mode categorical palette, one hue per room.
+# Chart series: one per room, from the standalone Zigbee sensors (all six rooms
+# instrumented since 2026-08-14; dining has a sensor but no cassette yet).
 title: HVAC
 views:
   - title: Climate
     path: climate
-    cards:
-      - type: thermostat
-        entity: climate.living_room_hvac
-        name: Living Room
-      - type: thermostat
-        entity: climate.kitchen_hvac
-        name: Kitchen
-      - type: thermostat
-        entity: climate.master_bedroom_hvac
-        name: Master Bedroom
-      - type: thermostat
-        entity: climate.nursery_hvac
-        name: Nursery
-      - type: thermostat
-        entity: climate.bedroom_1_hvac
-        name: Bedroom 1
-      - type: entities
-        title: Room sensors
-        entities:
-          - entity: sensor.living_room_sensor_temperature
-            name: Living room
-          - entity: sensor.nursery_sensor_temperature
+    type: sections
+    max_columns: 2
+    sections:
+      - type: grid
+        cards:
+          - type: heading
+            heading: Rooms
+          - type: tile
+            entity: climate.living_room_hvac
+            name: Living Room
+            state_content:
+              - state
+              - current_temperature
+            features:
+              - type: climate-hvac-modes
+                style: icons
+                hvac_modes: ["off", cool, heat, dry, fan_only]
+              - type: target-temperature
+          - type: tile
+            entity: climate.kitchen_hvac
+            name: Kitchen
+            state_content:
+              - state
+              - current_temperature
+            features:
+              - type: climate-hvac-modes
+                style: icons
+                hvac_modes: ["off", cool, heat, dry, fan_only]
+              - type: target-temperature
+          - type: tile
+            entity: climate.master_bedroom_hvac
+            name: Master Bedroom
+            state_content:
+              - state
+              - current_temperature
+            features:
+              - type: climate-hvac-modes
+                style: icons
+                hvac_modes: ["off", cool, heat, dry, fan_only]
+              - type: target-temperature
+          - type: tile
+            entity: climate.nursery_hvac
             name: Nursery
-      - type: history-graph
-        title: Last 24h
-        hours_to_show: 24
-        entities:
-          - entity: climate.living_room_hvac
-          - entity: climate.kitchen_hvac
-          - entity: climate.master_bedroom_hvac
-          - entity: climate.nursery_hvac
-          - entity: climate.bedroom_1_hvac
-          - entity: sensor.living_room_sensor_temperature
-          - entity: sensor.nursery_sensor_temperature
+            state_content:
+              - state
+              - current_temperature
+            features:
+              - type: climate-hvac-modes
+                style: icons
+                hvac_modes: ["off", cool, heat, dry, fan_only]
+              - type: target-temperature
+          - type: tile
+            entity: climate.bedroom_1_hvac
+            name: Bedroom 1
+            state_content:
+              - state
+              - current_temperature
+            features:
+              - type: climate-hvac-modes
+                style: icons
+                hvac_modes: ["off", cool, heat, dry, fan_only]
+              - type: target-temperature
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: Room sensors
+          - type: tile
+            entity: sensor.living_room_sensor_temperature
+            name: Living Room
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.living_room_sensor_humidity
+            name: Humidity
+          - type: tile
+            entity: sensor.kitchen_sensor_temperature
+            name: Kitchen
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.kitchen_sensor_humidity
+            name: Humidity
+          - type: tile
+            entity: sensor.master_sensor_temperature
+            name: Master Bedroom
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.master_sensor_humidity
+            name: Humidity
+          - type: tile
+            entity: sensor.nursery_sensor_temperature
+            name: Nursery
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.nursery_sensor_humidity
+            name: Humidity
+          - type: tile
+            entity: sensor.bed1_sensor_temperature
+            name: Bedroom 1
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.bed1_sensor_humidity
+            name: Humidity
+          - type: tile
+            entity: sensor.dining_sensor_temperature
+            name: Dining Room
+            state_content:
+              - state
+              - last_changed
+          - type: tile
+            entity: sensor.dining_sensor_humidity
+            name: Humidity
+          - type: entities
+            title: Sensor batteries
+            entities:
+              - entity: sensor.living_room_sensor_battery
+                name: Living room
+              - entity: sensor.kitchen_sensor_battery
+                name: Kitchen
+              - entity: sensor.master_sensor_battery
+                name: Master bedroom
+              - entity: sensor.nursery_sensor_battery
+                name: Nursery
+              - entity: sensor.bed1_sensor_battery
+                name: Bedroom 1
+              - entity: sensor.dining_sensor_battery
+                name: Dining room
+
+      - type: grid
+        cards:
+          - type: heading
+            heading: Upstairs setback
+          - type: entities
+            entities:
+              - entity: input_boolean.upstairs_setback_enabled
+                name: Daytime setback
+              - entity: input_number.upstairs_setback_temp
+                name: Setback target
+              - entity: input_number.upstairs_comfort_temp
+                name: Comfort target
+              - entity: input_number.nursery_temp_ceiling
+                name: Nursery ceiling
+              - entity: input_datetime.upstairs_setback_start
+                name: Setback starts
+              - entity: input_datetime.upstairs_restore_time
+                name: Restore at
+              - type: divider
+              - entity: automation.upstairs_apply_daytime_setback
+                name: Apply setback
+                secondary_info: last-triggered
+              - entity: automation.upstairs_restore_comfort_for_the_evening
+                name: Restore comfort
+                secondary_info: last-triggered
+              - entity: automation.nursery_cool_anyway_if_too_hot_during_setback
+                name: Nursery ceiling guard
+                secondary_info: last-triggered
+
+      - type: grid
+        column_span: 2
+        cards:
+          - type: heading
+            heading: History
+          - type: custom:apexcharts-card
+            grid_options:
+              columns: full
+            graph_span: 24h
+            header:
+              show: true
+              title: Room temperatures — last 24h
+              show_states: true
+              colorize_states: true
+            yaxis:
+              - decimals: 0
+                apex_config:
+                  tickAmount: 4
+            apex_config:
+              chart:
+                height: 320
+              grid:
+                borderColor: "rgba(255, 255, 255, 0.08)"
+              legend:
+                show: true
+            all_series_config:
+              stroke_width: 2
+              group_by:
+                func: avg
+                duration: 30min
+              show:
+                extremas: false
+                legend_value: false
+            series:
+              - entity: sensor.living_room_sensor_temperature
+                name: Living Room
+                color: "#3987e5"
+              - entity: sensor.kitchen_sensor_temperature
+                name: Kitchen
+                color: "#d95926"
+              - entity: sensor.master_sensor_temperature
+                name: Master Bedroom
+                color: "#199e70"
+              - entity: sensor.nursery_sensor_temperature
+                name: Nursery
+                color: "#c98500"
+              - entity: sensor.bed1_sensor_temperature
+                name: Bedroom 1
+                color: "#d55181"
+              - entity: sensor.dining_sensor_temperature
+                name: Dining Room
+                color: "#9b7ce6"
+          - type: custom:apexcharts-card
+            grid_options:
+              columns: full
+            graph_span: 24h
+            header:
+              show: true
+              title: Humidity — last 24h
+              show_states: true
+              colorize_states: true
+            yaxis:
+              - decimals: 0
+                apex_config:
+                  tickAmount: 4
+            apex_config:
+              chart:
+                height: 220
+              grid:
+                borderColor: "rgba(255, 255, 255, 0.08)"
+              legend:
+                show: true
+            all_series_config:
+              stroke_width: 2
+              group_by:
+                func: avg
+                duration: 30min
+              show:
+                extremas: false
+                legend_value: false
+            series:
+              - entity: sensor.living_room_sensor_humidity
+                name: Living Room
+                color: "#3987e5"
+              - entity: sensor.kitchen_sensor_humidity
+                name: Kitchen
+                color: "#d95926"
+              - entity: sensor.master_sensor_humidity
+                name: Master Bedroom
+                color: "#199e70"
+              - entity: sensor.nursery_sensor_humidity
+                name: Nursery
+                color: "#c98500"
+              - entity: sensor.bed1_sensor_humidity
+                name: Bedroom 1
+                color: "#d55181"
+              - entity: sensor.dining_sensor_humidity
+                name: Dining Room
+                color: "#9b7ce6"
