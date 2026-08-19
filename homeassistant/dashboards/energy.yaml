@@ -5,9 +5,9 @@
 # Layout: full-width Summary, then Circuits | Today side by side (both list all
 # 16 loads incl. the computed "Other" remainder), full-width history charts.
 # Charts use the same validated dark-mode categorical palette as hvac.yaml
-# (fixed hue order, color follows the entity). Big loads and room circuits get
-# separate charts so kW-scale traces don't squash the sub-300W ones (one axis
-# per chart, never dual-axis).
+# (fixed hue order, color follows the entity). History = whole-home power +
+# per-room power; kW appliances live in the whole-home trace and the Today
+# list, not their own chart (removed by request 2026-08-19).
 # The built-in HA Energy view (/energy) is wired separately via .storage/energy.
 title: Power
 views:
@@ -222,85 +222,6 @@ views:
                 color: "#3987e5"
                 type: area
                 opacity: 0.15
-          # Hourly kWh bars from long-term statistics — answers "when did the
-          # energy go" (the power lines above answer "what shape is the load").
-          # Statistics compile at the top of each hour, so the current hour
-          # appears only after it closes.
-          - type: custom:apexcharts-card
-            grid_options:
-              columns: full
-            graph_span: 24h
-            span:
-              end: hour
-            header:
-              show: true
-              title: Energy by hour — last 24h
-              show_states: false
-            yaxis:
-              - decimals: 1
-                min: 0
-                apex_config:
-                  tickAmount: 4
-                  forceNiceScale: true
-            apex_config:
-              chart:
-                height: 260
-              grid:
-                borderColor: "rgba(255, 255, 255, 0.08)"
-            series:
-              - entity: sensor.energy_monitor_total_daily_energy
-                name: Energy
-                color: "#3987e5"
-                type: column
-                unit: kWh
-                float_precision: 2
-                transform: return x / 1000;
-                statistics:
-                  type: change
-                  period: hour
-          - type: custom:apexcharts-card
-            grid_options:
-              columns: full
-            graph_span: 24h
-            header:
-              show: true
-              title: Big loads — last 24h
-              show_states: true
-              colorize_states: true
-            yaxis:
-              - decimals: 0
-                min: 0
-                apex_config:
-                  tickAmount: 4
-                  forceNiceScale: true
-            apex_config:
-              chart:
-                height: 300
-              grid:
-                borderColor: "rgba(255, 255, 255, 0.08)"
-              legend:
-                show: true
-            all_series_config:
-              stroke_width: 2
-              group_by:
-                func: avg
-                duration: 5min
-              show:
-                extremas: false
-                legend_value: false
-            series:
-              - entity: sensor.energy_monitor_hvac_outdoor_power
-                name: HVAC outdoor
-                color: "#3987e5"
-              - entity: sensor.energy_monitor_water_heater_power
-                name: Water heater
-                color: "#d95926"
-              - entity: sensor.energy_monitor_dryer_power
-                name: Dryer
-                color: "#199e70"
-              - entity: sensor.energy_monitor_hvac_indoor_units_power
-                name: HVAC indoor units
-                color: "#c98500"
           - type: custom:apexcharts-card
             grid_options:
               columns: full
