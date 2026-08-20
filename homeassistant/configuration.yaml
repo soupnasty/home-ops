@@ -191,6 +191,97 @@ template:
         unit_of_measurement: °F
         state: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') }}"
         availability: "{{ state_attr('climate.bedroom_1_hvac', 'current_temperature') is not none }}"
+      # HVAC operational stats for the hourly archive (docs/stats-archive.md):
+      # setpoint plus heating/cooling as 1/0 from the climate MODE (the cn105
+      # firmware doesn't publish hvac_action) — hourly mean = fraction of the
+      # hour that mode was enabled, not compressor duty; electrical duty comes
+      # from the Vue heat-pump channels. heat_cool sets neither flag. Dining
+      # joins when installed.
+      - name: "Living Room HVAC Setpoint"
+        unique_id: living_room_hvac_setpoint
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.living_room_hvac', 'temperature') }}"
+        availability: "{{ state_attr('climate.living_room_hvac', 'temperature') is not none }}"
+      - name: "Living Room HVAC Heating"
+        unique_id: living_room_hvac_heating
+        state_class: measurement
+        state: "{{ 1 if states('climate.living_room_hvac') == 'heat' else 0 }}"
+        availability: "{{ states('climate.living_room_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Living Room HVAC Cooling"
+        unique_id: living_room_hvac_cooling
+        state_class: measurement
+        state: "{{ 1 if states('climate.living_room_hvac') == 'cool' else 0 }}"
+        availability: "{{ states('climate.living_room_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Nursery HVAC Setpoint"
+        unique_id: nursery_hvac_setpoint
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.nursery_hvac', 'temperature') }}"
+        availability: "{{ state_attr('climate.nursery_hvac', 'temperature') is not none }}"
+      - name: "Nursery HVAC Heating"
+        unique_id: nursery_hvac_heating
+        state_class: measurement
+        state: "{{ 1 if states('climate.nursery_hvac') == 'heat' else 0 }}"
+        availability: "{{ states('climate.nursery_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Nursery HVAC Cooling"
+        unique_id: nursery_hvac_cooling
+        state_class: measurement
+        state: "{{ 1 if states('climate.nursery_hvac') == 'cool' else 0 }}"
+        availability: "{{ states('climate.nursery_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Kitchen HVAC Setpoint"
+        unique_id: kitchen_hvac_setpoint
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.kitchen_hvac', 'temperature') }}"
+        availability: "{{ state_attr('climate.kitchen_hvac', 'temperature') is not none }}"
+      - name: "Kitchen HVAC Heating"
+        unique_id: kitchen_hvac_heating
+        state_class: measurement
+        state: "{{ 1 if states('climate.kitchen_hvac') == 'heat' else 0 }}"
+        availability: "{{ states('climate.kitchen_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Kitchen HVAC Cooling"
+        unique_id: kitchen_hvac_cooling
+        state_class: measurement
+        state: "{{ 1 if states('climate.kitchen_hvac') == 'cool' else 0 }}"
+        availability: "{{ states('climate.kitchen_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Master Bedroom HVAC Setpoint"
+        unique_id: master_bedroom_hvac_setpoint
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.master_bedroom_hvac', 'temperature') }}"
+        availability: "{{ state_attr('climate.master_bedroom_hvac', 'temperature') is not none }}"
+      - name: "Master Bedroom HVAC Heating"
+        unique_id: master_bedroom_hvac_heating
+        state_class: measurement
+        state: "{{ 1 if states('climate.master_bedroom_hvac') == 'heat' else 0 }}"
+        availability: "{{ states('climate.master_bedroom_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Master Bedroom HVAC Cooling"
+        unique_id: master_bedroom_hvac_cooling
+        state_class: measurement
+        state: "{{ 1 if states('climate.master_bedroom_hvac') == 'cool' else 0 }}"
+        availability: "{{ states('climate.master_bedroom_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Bedroom 1 HVAC Setpoint"
+        unique_id: bedroom_1_hvac_setpoint
+        device_class: temperature
+        state_class: measurement
+        unit_of_measurement: °F
+        state: "{{ state_attr('climate.bedroom_1_hvac', 'temperature') }}"
+        availability: "{{ state_attr('climate.bedroom_1_hvac', 'temperature') is not none }}"
+      - name: "Bedroom 1 HVAC Heating"
+        unique_id: bedroom_1_hvac_heating
+        state_class: measurement
+        state: "{{ 1 if states('climate.bedroom_1_hvac') == 'heat' else 0 }}"
+        availability: "{{ states('climate.bedroom_1_hvac') not in ('unknown', 'unavailable') }}"
+      - name: "Bedroom 1 HVAC Cooling"
+        unique_id: bedroom_1_hvac_cooling
+        state_class: measurement
+        state: "{{ 1 if states('climate.bedroom_1_hvac') == 'cool' else 0 }}"
+        availability: "{{ states('climate.bedroom_1_hvac') not in ('unknown', 'unavailable') }}"
       # Whole-home cost so far today: Vue daily energy (Wh) × electricity price.
       # Resets at midnight with the underlying counter.
       - name: "Energy Cost Today"
